@@ -804,6 +804,175 @@ class TestShellScripts(unittest.TestCase):
             )
             self.assertFalse((dst_gem / "antigravity-cli" / "presence" / "stale.lock").exists())
 
+    def test_07_screenpad_hud_launcher_omarchy_lua_and_silicon_probe(self) -> None:
+        launcher = BIN_DIR / "launch-screenpad-hud.sh"
+        self.assertTrue(launcher.is_file())
+        p_syn = subprocess.run(["bash", "-n", str(launcher)], capture_output=True, text=True, check=False)
+        self.assertEqual(p_syn.returncode, 0, p_syn.stderr)
+
+        p_help = subprocess.run(["bash", str(launcher), "--help"], capture_output=True, text=True, check=False)
+        self.assertEqual(p_help.returncode, 0, p_help.stderr)
+        self.assertIn("DP-3", p_help.stdout)
+        self.assertIn("workspace 11", p_help.stdout)
+
+        p_dry = subprocess.run(
+            [
+                "bash",
+                str(launcher),
+                "--dry-run",
+                "--workspace",
+                "11",
+                "--monitor",
+                "DP-3",
+                "--terminal",
+                "foot",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(p_dry.returncode, 0, p_dry.stderr)
+        self.assertIn("DRY-RUN MONITOR=DP-3 WORKSPACE=11", p_dry.stdout)
+        self.assertIn("hl.dsp.exec_cmd(", p_dry.stdout)
+        self.assertIn("workspace 11 silent", p_dry.stdout)
+        self.assertIn("toroid-hud.py", p_dry.stdout)
+
+        # Mocked hyprctl tests: Omarchy 4.5.0 Lua backend, classic Hyprland fallback (rc=7 on Lua), and fail-closed.
+        with tempfile.TemporaryDirectory(prefix="alsh_hypr_mock_") as td:
+            fake_bin = Path(td)
+            fake_term = fake_bin / "foot"
+            fake_term.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+            fake_term.chmod(0o755)
+            log_file = fake_bin / "hyprctl.log"
+
+            # (a) Omarchy 4.5.0 Lua hyprctl accepts hl.dsp.exec_cmd(...) on first call.
+            fake_hypr = fake_bin / "hyprctl"
+            fake_hypr.write_text(
+                "#!/usr/bin/env bash\n"
+                f"printf '%s\\n' \"$*\" >> '{log_file}'\n"
+                'if [[ "$1" == "dispatch" && "$2" == hl.dsp.exec_cmd\\(* ]]; then\n'
+                '  echo "ok"\n'
+                "  exit 0\n"
+                "fi\n"
+                "exit 7\n",
+                encoding="utf-8",
+            )
+            fake_hypr.chmod(0o755)
+            env_mock = {**os.environ, "PATH": f"{fake_bin}:{os.environ.get('PATH', '')}"}
+            p_lua = subprocess.run(
+                ["bash", str(launcher), "--workspace", "11", "--monitor", "DP-3", "--terminal", "foot"],
+                capture_output=True,
+                text=True,
+                env=env_mock,
+                check=False,
+            )
+            self.assertEqual(p_lua.returncode, 0, p_lua.stderr)
+            self.assertIn("backend=omarchy-lua", p_lua.stdout)
+            lua_calls = log_file.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lua_calls), 1)
+            self.assertIn("hl.dsp.exec_cmd(", lua_calls[0])
+            self.assertIn("[workspace 11 silent]", lua_calls[0])
+
+            # (b) Classic Hyprland rejects Lua dispatch with rc=7 and falls back cleanly to dispatch exec.
+            log_file.unlink()
+            fake_hypr.write_text(
+                "#!/usr/bin/env bash\n"
+                f"printf '%s\\n' \"$*\" >> '{log_file}'\n"
+                'if [[ "$1" == "dispatch" && "$2" == "exec" ]]; then\n'
+                '  echo "ok"\n'
+                "  exit 0\n"
+                "fi\n"
+                "exit 7\n",
+                encoding="utf-8",
+            )
+            p_classic = subprocess.run(
+                ["bash", str(launcher), "--workspace", "11", "--monitor", "DP-3", "--terminal", "foot"],
+                capture_output=True,
+                text=True,
+                env=env_mock,
+                check=False,
+            )
+            self.assertEqual(p_classic.returncode, 0, p_classic.stderr)
+            self.assertIn("backend=classic-hyprland", p_classic.stdout)
+            classic_calls = log_file.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(classic_calls), 2)
+            self.assertIn("hl.dsp.exec_cmd(", classic_calls[0])
+            self.assertTrue(classic_calls[1].startswith("dispatch exec [workspace 11 silent]"))
+
+            # (c) Both backends failing must fail closed with non-zero exit code.
+            fake_hypr.write_text("#!/usr/bin/env bash\nexit 7\n", encoding="utf-8")
+            p_fail = subprocess.run(
+                ["bash", str(launcher), "--workspace", "11", "--monitor", "DP-3", "--terminal", "foot"],
+                capture_output=True,
+                text=True,
+                env=env_mock,
+                check=False,
+            )
+            self.assertNotEqual(p_fail.returncode, 0)
+            self.assertIn("ERROR: hyprctl failed", p_fail.stderr)
+
+        # Invalid arguments must fail closed with rc=2.
+        for bad_args in (
+            ["--workspace", "0"],
+            ["--interval", "abc"],
+            ["--window", "-5"],
+            ["--monitor", "DP-3;rm"],
+            ["--unknown-flag"],
+        ):
+            p_bad = subprocess.run(["bash", str(launcher), *bad_args], capture_output=True, text=True, check=False)
+            self.assertEqual(p_bad.returncode, 2, f"expected rc=2 for {bad_args}, got {p_bad.returncode}")
+
+        # --once --json works end-to-end against a synthetic swarm directory.
+        with tempfile.TemporaryDirectory(prefix="alsh_launch_") as td:
+            root = Path(td)
+            sdir = root / "ag" / "brain" / "cid1" / ".system_generated" / "swarm"
+            sdir.mkdir(parents=True)
+            (sdir / "board.jsonl").write_text(
+                json.dumps({"seq": 1, "agent": "session-cartographer", "text": "Mapped Track S1 VERIFIED"}) + "\n",
+                encoding="utf-8",
+            )
+            atlas_p = root / "atlas.md"
+            atlas_p.write_text("# Atlas\nTrack S1\n", encoding="utf-8")
+            p_once = subprocess.run(
+                [
+                    "bash",
+                    str(launcher),
+                    "--once",
+                    "--json",
+                    "--gemini-dir",
+                    str(root / "ag"),
+                    "--atlas",
+                    str(atlas_p),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(p_once.returncode, 0, p_once.stderr)
+            snap = json.loads(p_once.stdout)
+            self.assertEqual(snap["status"], "OK")
+            self.assertEqual(snap["toroid"]["head_seq"], 1)
+
+        # Live-verified Omarchy 4.5.0 Lua snippet & CUDA sm_86 silicon probe checks.
+        lua_path = ROOT / "configs" / "omarchy-4.5-ux582hs-monitors.lua"
+        self.assertTrue(lua_path.is_file())
+        lua_txt = lua_path.read_text(encoding="utf-8")
+        self.assertIn('output = "eDP-1"', lua_txt)
+        self.assertIn('output = "DP-3"', lua_txt)
+        self.assertIn('mode = "3840x1100@60"', lua_txt)
+        self.assertIn('position = "0x1080"', lua_txt)
+        self.assertIn('name = "elan9009:00-04f3:2c23"', lua_txt)
+        self.assertIn('name = "elan9008:00-04f3:2c56"', lua_txt)
+
+        cu_path = ROOT / "bench" / "rtx3080_sm86_silicon_probe.cu"
+        self.assertTrue(cu_path.is_file())
+        cu_raw = cu_path.read_bytes()
+        self.assertNotIn(b"\r", cu_raw)
+        cu_txt = cu_raw.decode("utf-8")
+        self.assertIn("hamming_a16_syndrome_decode_kernel", cu_txt)
+        self.assertIn("block_h2_int8_kernel", cu_txt)
+        self.assertNotIn("/" + "home" + "/", cu_txt)
+
 
 if __name__ == "__main__":
     unittest.main()
