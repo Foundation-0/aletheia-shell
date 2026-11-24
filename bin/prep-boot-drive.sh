@@ -111,13 +111,23 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
   exit 0
 fi
 
-# 2. Unmount any currently mounted partitions on DEV.
-echo "[2/6] Unmounting existing partitions on $DEV..."
-while IFS= read -r part; do
-  if [[ -n "$part" && "$part" != "$DEV" ]]; then
-    umount "$part" 2>/dev/null || true
-  fi
-done < <(lsblk -nr -o PATH "$DEV")
+unmount_device_tree() {
+  local target_dev="$1"
+  local path mp
+  # Unmount every active mountpoint on the whole disk (hybrid ISO udisks2 auto-mount) AND all partitions.
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    while IFS= read -r mp; do
+      [[ -n "$mp" ]] || continue
+      umount "$mp" 2>/dev/null || umount -l "$mp" 2>/dev/null || true
+    done < <(findmnt -rn -o TARGET --source "$path" 2>/dev/null || true)
+    umount "$path" 2>/dev/null || true
+  done < <(lsblk -nr -o PATH "$target_dev" 2>/dev/null || printf '%s\n' "$target_dev")
+}
+
+# 2. Unmount any currently mounted whole-disk or partition targets on DEV.
+echo "[2/6] Unmounting existing mounts on $DEV..."
+unmount_device_tree "$DEV"
 
 # 3. Wipe stale signatures and flash verified hybrid ISO to DEV.
 echo "[3/6] Wiping old partition signatures on $DEV..."
@@ -127,13 +137,17 @@ echo "[4/6] Flashing verified ISO to $DEV (dd bs=4M conv=fsync)..."
 dd if="$ISO" of="$DEV" bs=4M status=progress conv=fsync
 sync
 partprobe "$DEV" || true
-sleep 2
+udevadm settle || sleep 2
+# Desktop auto-mounters (udisks2) immediately mount the hybrid ISO at sector 0 on $DEV;
+# release that whole-disk mount so sfdisk/partprobe/mkfs.ext4 do not hit EBUSY.
+unmount_device_tree "$DEV"
 
 # 4. Append partition 3 (Linux ext4) at START_SECTORS without disturbing ISO partitions 1 & 2.
 echo "[5/6] Appending partition 3 (${LABEL}, ext4) starting at ${START_GIB} GiB (sector ${START_SECTORS})..."
 printf '%s,,83\n' "$START_SECTORS" | sfdisk --append --no-reread "$DEV"
-partprobe "$DEV"
+partprobe "$DEV" || true
 udevadm settle || sleep 2
+unmount_device_tree "$DEV"
 
 PART3="${DEV}3"
 if [[ "$DEV" == *"nvme"* || "$DEV" == *"mmcblk"* ]]; then
@@ -142,6 +156,7 @@ fi
 [[ -b "$PART3" ]] || { echo "ERROR: expected partition device $PART3 not found" >&2; exit 1; }
 
 echo "[6/6] Formatting $PART3 as ext4 (${LABEL}) and mounting at ${MOUNT_DIR}..."
+unmount_device_tree "$DEV"
 mkfs.ext4 -F -L "$LABEL" "$PART3"
 mkdir -p "$MOUNT_DIR"
 mount "$PART3" "$MOUNT_DIR"
