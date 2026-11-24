@@ -1,0 +1,16 @@
+[Unit]
+Description=Aletheia Continual-Toroid Flow Watchdog (CS-01 / CS-22 / CS-23)
+After=default.target
+
+[Service]
+Type=oneshot
+Environment=OPENBLAS_NUM_THREADS=1
+Environment=OMP_NUM_THREADS=1
+EnvironmentFile=-%h/.config/aletheia-shell/watchdog.env
+ExecStart=/usr/bin/python3 -I -B %h/Projects/expedition/publish/aletheia-shell/bin/toroid-hud.py --once --json --auto-discover --gemini-dir %h/.gemini/antigravity-cli --atlas %h/Projects/expedition/cartography/UNIFIED_OPERATOR_ATLAS.md
+StandardOutput=journal
+StandardError=journal
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadOnlyPaths=%h/.gemini/antigravity-cli %h/Projects/expedition

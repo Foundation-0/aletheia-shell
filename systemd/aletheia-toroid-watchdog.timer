@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Aletheia Continual-Toroid Flow Watchdog every 30 minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=30min
+RandomizedDelaySec=60s
+Persistent=true
+Unit=aletheia-toroid-watchdog.service
+
+[Install]
+WantedBy=timers.target
