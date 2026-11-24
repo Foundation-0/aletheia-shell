@@ -210,6 +210,15 @@ sh_quote() {
     printf "'%s'" "${s//\'/\'\\\'\'}"
 }
 
+lua_quote() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    printf '"%s"' "${s}"
+}
+
 QUOTED_LAUNCH=""
 for arg in "${LAUNCH_CMD[@]}"; do
     QUOTED_LAUNCH+="$(sh_quote "${arg}") "
@@ -217,10 +226,12 @@ done
 QUOTED_LAUNCH="${QUOTED_LAUNCH% }"
 
 DISPATCH_RULE="[workspace ${WORKSPACE} silent] ${QUOTED_LAUNCH}"
+LUA_DISPATCH_EXPR="hl.dsp.exec_cmd($(lua_quote "${DISPATCH_RULE}"))"
 
 if [[ "${DRY_RUN}" == "1" ]]; then
     printf 'DRY-RUN MONITOR=%s WORKSPACE=%s\n' "${MONITOR}" "${WORKSPACE}"
-    printf 'DRY-RUN DISPATCH: hyprctl dispatch exec %s\n' "$(sh_quote "${DISPATCH_RULE}")"
+    printf 'DRY-RUN DISPATCH (omarchy-lua): hyprctl dispatch %s\n' "$(sh_quote "${LUA_DISPATCH_EXPR}")"
+    printf 'DRY-RUN DISPATCH (classic-fallback): hyprctl dispatch exec %s\n' "$(sh_quote "${DISPATCH_RULE}")"
     exit 0
 fi
 
@@ -234,5 +245,13 @@ if ! command -v "${TERM_NAME}" >/dev/null 2>&1; then
     exit 2
 fi
 
-hyprctl dispatch exec "${DISPATCH_RULE}"
-echo "[launch-screenpad-hud] LAUNCHED workspace=${WORKSPACE} monitor=${MONITOR} terminal=${TERM_BASE}"
+DISPATCH_BACKEND=""
+if hyprctl dispatch "${LUA_DISPATCH_EXPR}" >/dev/null 2>&1; then
+    DISPATCH_BACKEND="omarchy-lua"
+elif hyprctl dispatch exec "${DISPATCH_RULE}" >/dev/null 2>&1; then
+    DISPATCH_BACKEND="classic-hyprland"
+else
+    echo "[launch-screenpad-hud] ERROR: hyprctl failed for both Omarchy Lua (hl.dsp.exec_cmd) and classic dispatch exec" >&2
+    exit 1
+fi
+echo "[launch-screenpad-hud] LAUNCHED backend=${DISPATCH_BACKEND} workspace=${WORKSPACE} monitor=${MONITOR} terminal=${TERM_BASE}"

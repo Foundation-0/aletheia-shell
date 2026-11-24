@@ -833,8 +833,83 @@ class TestShellScripts(unittest.TestCase):
         )
         self.assertEqual(p_dry.returncode, 0, p_dry.stderr)
         self.assertIn("DRY-RUN MONITOR=DP-3 WORKSPACE=11", p_dry.stdout)
+        self.assertIn("hl.dsp.exec_cmd(", p_dry.stdout)
         self.assertIn("workspace 11 silent", p_dry.stdout)
         self.assertIn("toroid-hud.py", p_dry.stdout)
+
+        # Mocked hyprctl tests: Omarchy 4.5.0 Lua backend, classic Hyprland fallback (rc=7 on Lua), and fail-closed.
+        with tempfile.TemporaryDirectory(prefix="alsh_hypr_mock_") as td:
+            fake_bin = Path(td)
+            fake_term = fake_bin / "foot"
+            fake_term.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+            fake_term.chmod(0o755)
+            log_file = fake_bin / "hyprctl.log"
+
+            # (a) Omarchy 4.5.0 Lua hyprctl accepts hl.dsp.exec_cmd(...) on first call.
+            fake_hypr = fake_bin / "hyprctl"
+            fake_hypr.write_text(
+                "#!/usr/bin/env bash\n"
+                f"printf '%s\\n' \"$*\" >> '{log_file}'\n"
+                'if [[ "$1" == "dispatch" && "$2" == hl.dsp.exec_cmd\\(* ]]; then\n'
+                '  echo "ok"\n'
+                "  exit 0\n"
+                "fi\n"
+                "exit 7\n",
+                encoding="utf-8",
+            )
+            fake_hypr.chmod(0o755)
+            env_mock = {**os.environ, "PATH": f"{fake_bin}:{os.environ.get('PATH', '')}"}
+            p_lua = subprocess.run(
+                ["bash", str(launcher), "--workspace", "11", "--monitor", "DP-3", "--terminal", "foot"],
+                capture_output=True,
+                text=True,
+                env=env_mock,
+                check=False,
+            )
+            self.assertEqual(p_lua.returncode, 0, p_lua.stderr)
+            self.assertIn("backend=omarchy-lua", p_lua.stdout)
+            lua_calls = log_file.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lua_calls), 1)
+            self.assertIn("hl.dsp.exec_cmd(", lua_calls[0])
+            self.assertIn("[workspace 11 silent]", lua_calls[0])
+
+            # (b) Classic Hyprland rejects Lua dispatch with rc=7 and falls back cleanly to dispatch exec.
+            log_file.unlink()
+            fake_hypr.write_text(
+                "#!/usr/bin/env bash\n"
+                f"printf '%s\\n' \"$*\" >> '{log_file}'\n"
+                'if [[ "$1" == "dispatch" && "$2" == "exec" ]]; then\n'
+                '  echo "ok"\n'
+                "  exit 0\n"
+                "fi\n"
+                "exit 7\n",
+                encoding="utf-8",
+            )
+            p_classic = subprocess.run(
+                ["bash", str(launcher), "--workspace", "11", "--monitor", "DP-3", "--terminal", "foot"],
+                capture_output=True,
+                text=True,
+                env=env_mock,
+                check=False,
+            )
+            self.assertEqual(p_classic.returncode, 0, p_classic.stderr)
+            self.assertIn("backend=classic-hyprland", p_classic.stdout)
+            classic_calls = log_file.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(classic_calls), 2)
+            self.assertIn("hl.dsp.exec_cmd(", classic_calls[0])
+            self.assertTrue(classic_calls[1].startswith("dispatch exec [workspace 11 silent]"))
+
+            # (c) Both backends failing must fail closed with non-zero exit code.
+            fake_hypr.write_text("#!/usr/bin/env bash\nexit 7\n", encoding="utf-8")
+            p_fail = subprocess.run(
+                ["bash", str(launcher), "--workspace", "11", "--monitor", "DP-3", "--terminal", "foot"],
+                capture_output=True,
+                text=True,
+                env=env_mock,
+                check=False,
+            )
+            self.assertNotEqual(p_fail.returncode, 0)
+            self.assertIn("ERROR: hyprctl failed", p_fail.stderr)
 
         # Invalid arguments must fail closed with rc=2.
         for bad_args in (
