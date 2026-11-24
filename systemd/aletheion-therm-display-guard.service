@@ -1,0 +1,16 @@
+[Unit]
+Description=Aletheion HQ Hysteretic Thermal-Display Governor (UX582HS OLED + ScreenPad Plus)
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -I -B %h/.local/bin/aletheion-therm-display-guard --daemon --interval 5
+Restart=on-failure
+RestartSec=5
+Nice=15
+StandardOutput=journal
+StandardError=journal
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=default.target
