@@ -1,0 +1,7 @@
+{
+  "name": "aletheia-deck-bridge",
+  "version": "1.0.0",
+  "description": "Official Antigravity lifecycle hook bridge linking Aletheia Deck (ScreenPad Plus) with the Coordinator swarm session via SHARED_WORKSPACE.md, PI_INBOX.jsonl, and swarm_feed.json.",
+  "repository": "https://github.com/Foundation-0/aletheia-shell",
+  "license": "MIT"
+}

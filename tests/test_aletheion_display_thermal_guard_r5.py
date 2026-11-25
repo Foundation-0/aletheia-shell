@@ -130,7 +130,7 @@ class TestAletheionDisplayAndThermalGuardR5(unittest.TestCase):
         st = disp.run_self_test()
         self.assertTrue(st["all_passed"])
         self.assertEqual(st["min_brightness_floor_pct"], 20)
-        self.assertEqual(st["refusals_verified"], 5)
+        self.assertEqual(st["refusals_verified"], 7)
 
         self.assertIsNone(disp._parse_ascii_uint(None))
         self.assertIsNone(disp._parse_ascii_uint(""))
@@ -144,12 +144,26 @@ class TestAletheionDisplayAndThermalGuardR5(unittest.TestCase):
 
         with mock.patch.object(disp.Path, "exists", return_value=False):
             self.assertEqual(disp._try_set_screenpad_backlight(100, dry_run=False)["reason"], "device_absent")
-        with mock.patch.object(disp.Path, "exists", return_value=True), mock.patch.object(disp.os, "access", return_value=False):
-            self.assertEqual(disp._try_set_screenpad_backlight(100, dry_run=False)["reason"], "non_writable_use_hyprctl_primary")
-        with mock.patch.object(disp.Path, "exists", return_value=True), mock.patch.object(disp.os, "access", return_value=True):
+        with (
+            mock.patch.object(disp.Path, "exists", return_value=True),
+            mock.patch.object(disp.shutil, "which", return_value=None),
+            mock.patch.object(disp.os, "access", return_value=False),
+        ):
+            self.assertEqual(disp._try_set_screenpad_backlight(100, dry_run=False)["reason"], "brightnessctl_absent_and_sysfs_non_writable")
+        with mock.patch.object(disp.Path, "exists", return_value=True):
             self.assertTrue(disp._try_set_screenpad_backlight(100, dry_run=True)["dry_run"])
         with (
             mock.patch.object(disp.Path, "exists", return_value=True),
+            mock.patch.object(disp.shutil, "which", return_value="/usr/bin/brightnessctl"),
+            mock.patch.object(disp, "_run_cmd", return_value=(0, "ok", "")),
+            mock.patch.object(disp, "read_screenpad_actual_brightness", return_value=0),
+        ):
+            res_bl = disp._try_set_screenpad_backlight(0, dry_run=False)
+            self.assertTrue(res_bl["ok"])
+            self.assertEqual(res_bl["verified_actual_brightness"], 0)
+        with (
+            mock.patch.object(disp.Path, "exists", return_value=True),
+            mock.patch.object(disp.shutil, "which", return_value=None),
             mock.patch.object(disp.os, "access", return_value=True),
             mock.patch.object(disp.Path, "write_text", side_effect=OSError("ioerr")),
         ):
@@ -241,8 +255,13 @@ class TestAletheionDisplayAndThermalGuardR5(unittest.TestCase):
     def test_03_thermal_display_guard_hysteresis_and_100pct_mutation(self) -> None:
         st = tdg.run_self_test()
         self.assertTrue(st["all_passed"])
-        self.assertEqual(st["checks_verified"], 7)
+        self.assertEqual(st["checks_verified"], 9)
         self.assertEqual(st["min_brightness_floor_pct"], 20)
+        self.assertEqual(tdg.compute_shed_target_pct(20, 35), 20)
+        self.assertEqual(tdg.compute_shed_target_pct(80, 35), 35)
+        self.assertEqual(tdg.parse_dpms_wake_event("dpms>>eDP-1,1"), "eDP-1")
+        self.assertEqual(tdg.parse_dpms_wake_event("dpms>>DP-3,1"), "DP-3")
+        self.assertIsNone(tdg.parse_dpms_wake_event("dpms>>eDP-1,0"))
 
         self.assertIsNone(tdg._parse_ascii_uint(None))
         self.assertIsNone(tdg._parse_ascii_uint(""))
@@ -296,12 +315,23 @@ class TestAletheionDisplayAndThermalGuardR5(unittest.TestCase):
         try:
             os.chmod(tmp_dir, 0o755)
             st_file = tmp_dir / "display_guard.json"
-            act_shed = tdg.execute_transition("SHED", t_cpu_c=90, t_gpu_c=62, cfg=cfg, state_path=st_file, dry_run=True)
+            with mock.patch.object(tdg, "read_intel_backlight_pct", return_value=80):
+                act_shed = tdg.execute_transition("SHED", t_cpu_c=90, t_gpu_c=62, cfg=cfg, state_path=st_file, dry_run=True)
             self.assertFalse(act_shed["executed"])
             self.assertEqual(act_shed["target_brightness_pct"], 35)
+            with mock.patch.object(tdg, "read_intel_backlight_pct", return_value=20):
+                act_shed_dim = tdg.execute_transition("SHED", t_cpu_c=90, t_gpu_c=62, cfg=cfg, state_path=st_file, dry_run=True)
+            self.assertEqual(act_shed_dim["target_brightness_pct"], 20)
             act_rest = tdg.execute_transition("RESTORE", t_cpu_c=70, t_gpu_c=60, cfg=cfg, state_path=st_file, dry_run=True)
             self.assertFalse(act_rest["executed"])
             self.assertGreaterEqual(act_rest["restore_brightness_pct"], 20)
+
+            tdg.save_state(st_file, {"screen_sleep_active": True, "saved_screenpad_brightness": 95})
+            wake_on = tdg.handle_dpms_wake("eDP-1", state_path=st_file, dry_run=True, pad_active_override=True)
+            self.assertTrue(wake_on["handled"])
+            self.assertEqual(wake_on["target_screenpad_brightness"], 95)
+            wake_off = tdg.handle_dpms_wake("eDP-1", state_path=st_file, dry_run=True, pad_active_override=False)
+            self.assertEqual(wake_off["target_screenpad_brightness"], 0)
 
             tdg.save_state(st_file, {"shed_active": True})
             tdg.save_state(st_file, {"shed_active": False})
