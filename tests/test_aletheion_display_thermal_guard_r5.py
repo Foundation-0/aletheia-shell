@@ -257,6 +257,8 @@ class TestAletheionDisplayAndThermalGuardR5(unittest.TestCase):
         self.assertTrue(st["all_passed"])
         self.assertEqual(st["checks_verified"], 9)
         self.assertEqual(st["min_brightness_floor_pct"], 20)
+        self.assertEqual(tdg.compute_shed_target_pct(5, 35), 5)
+        self.assertEqual(tdg.compute_shed_target_pct(10, 35), 10)
         self.assertEqual(tdg.compute_shed_target_pct(20, 35), 20)
         self.assertEqual(tdg.compute_shed_target_pct(80, 35), 35)
         self.assertEqual(tdg.parse_dpms_wake_event("dpms>>eDP-1,1"), "eDP-1")
@@ -322,6 +324,14 @@ class TestAletheionDisplayAndThermalGuardR5(unittest.TestCase):
             with mock.patch.object(tdg, "read_intel_backlight_pct", return_value=20):
                 act_shed_dim = tdg.execute_transition("SHED", t_cpu_c=90, t_gpu_c=62, cfg=cfg, state_path=st_file, dry_run=True)
             self.assertEqual(act_shed_dim["target_brightness_pct"], 20)
+            with mock.patch.object(tdg, "read_intel_backlight_pct", return_value=5):
+                act_shed_ultradim = tdg.execute_transition("SHED", t_cpu_c=90, t_gpu_c=62, cfg=cfg, state_path=st_file, dry_run=True)
+            self.assertEqual(act_shed_ultradim["saved_brightness_pct"], 5)
+            self.assertEqual(act_shed_ultradim["target_brightness_pct"], 5)
+            tdg.save_state(st_file, {"saved_brightness_pct": 5, "shed_active": True})
+            act_rest_ultradim = tdg.execute_transition("RESTORE", t_cpu_c=70, t_gpu_c=60, cfg=cfg, state_path=st_file, dry_run=True)
+            self.assertEqual(act_rest_ultradim["restore_brightness_pct"], 5)
+            tdg.save_state(st_file, {"saved_brightness_pct": None, "shed_active": True})
             act_rest = tdg.execute_transition("RESTORE", t_cpu_c=70, t_gpu_c=60, cfg=cfg, state_path=st_file, dry_run=True)
             self.assertFalse(act_rest["executed"])
             self.assertGreaterEqual(act_rest["restore_brightness_pct"], 20)

@@ -18,7 +18,9 @@ Hardware facts (live-verified on UX582HS):
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import errno
+import fcntl
 import glob
 import hashlib
 import json
@@ -26,12 +28,13 @@ import os
 from pathlib import Path
 import re
 import secrets
+import shlex
 import shutil
 import stat
 import subprocess
 import sys
 import time
-from typing import Any
+from typing import Any, Iterator
 
 
 PRIMARY_OUTPUT = "eDP-1"
@@ -139,6 +142,37 @@ def _open_state_parent_fd(parent: Path, *, create_missing: bool) -> int:
         if exc.errno in (errno.ELOOP, errno.ENOTDIR):
             raise DisplayError("SYMLINK_FORBIDDEN", f"state parent is symlink or non-directory: {parent}") from exc
         raise DisplayError("STATE_DIR_ERROR", f"cannot open state directory {parent}: {exc}") from exc
+
+
+@contextmanager
+def _guard_state_lock(state_path: Path, *, enabled: bool) -> Iterator[None]:
+    """Advisory flock on `.display_guard.lock` preventing concurrent read-modify-write races."""
+    if not enabled:
+        yield
+        return
+    parent_fd = _open_state_parent_fd(state_path.parent, create_missing=True)
+    lock_fd = -1
+    try:
+        try:
+            lock_fd = os.open(
+                f".{state_path.name}.lock",
+                os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW,
+                0o600,
+                dir_fd=parent_fd,
+            )
+        except OSError as exc:
+            if exc.errno == errno.ELOOP:
+                raise DisplayError("SYMLINK_FORBIDDEN", f"lock file is symlink: {state_path}") from exc
+            raise DisplayError("STATE_LOCK_ERROR", f"cannot open lock file for {state_path}: {exc}") from exc
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        if lock_fd >= 0:
+            try:
+                fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            finally:
+                os.close(lock_fd)
+        os.close(parent_fd)
 
 
 def load_guard_state(state_path: Path) -> dict[str, Any]:
@@ -456,76 +490,77 @@ def apply_mode(
 ) -> dict[str, Any]:
     require_ok(mode in VALID_MODES, "INVALID_MODE", f"mode must be in {VALID_MODES}, got {mode!r}")
 
-    state = load_guard_state(state_path)
-    actions: list[dict[str, Any]] = []
-    # Always ensure primary eDP-1 stays safely at native EDID 3840x2160@60 scale 2!
-    edp_lua = build_lua_monitor_cmd(
-        PRIMARY_OUTPUT, disabled=False, mode=PRIMARY_MODE_SAFE, position=PRIMARY_POS, scale=PRIMARY_SCALE
-    )
-
-    if mode == "dual":
-        pad_lua = build_lua_monitor_cmd(
-            PAD_OUTPUT, disabled=False, mode=PAD_MODE_FULL, position=PAD_POS, scale=PAD_SCALE_FULL
+    with _guard_state_lock(state_path, enabled=not dry_run):
+        state = load_guard_state(state_path)
+        actions: list[dict[str, Any]] = []
+        # Always ensure primary eDP-1 stays safely at native EDID 3840x2160@60 scale 2!
+        edp_lua = build_lua_monitor_cmd(
+            PRIMARY_OUTPUT, disabled=False, mode=PRIMARY_MODE_SAFE, position=PRIMARY_POS, scale=PRIMARY_SCALE
         )
-        actions.append(_apply_hypr_lua(edp_lua, dry_run=dry_run))
-        actions.append(_apply_hypr_lua(pad_lua, dry_run=dry_run))
-        restore_val = resolve_screenpad_restore_brightness(state, SCREENPAD_DEFAULT_DUAL_BRIGHTNESS)
-        bl_res = _try_set_screenpad_backlight(restore_val, dry_run=dry_run)
-        override_val = "pin-on"
-        notif_msg = f"Dual 4K + ScreenPad Plus (3840x1100@60, backlight {restore_val}/255) active"
-    elif mode == "pad-half":
-        pad_lua = build_lua_monitor_cmd(
-            PAD_OUTPUT, disabled=False, mode=PAD_MODE_HALF, position=PAD_POS, scale=PAD_SCALE_HALF
-        )
-        actions.append(_apply_hypr_lua(edp_lua, dry_run=dry_run))
-        actions.append(_apply_hypr_lua(pad_lua, dry_run=dry_run))
-        restore_val = resolve_screenpad_restore_brightness(state, SCREENPAD_DEFAULT_HALF_BRIGHTNESS)
-        bl_res = _try_set_screenpad_backlight(restore_val, dry_run=dry_run)
-        override_val = "pin-on"
-        notif_msg = f"ScreenPad Plus half-res (1920x550@60, backlight {restore_val}/255)"
-    elif mode == "single":
-        cur_pad_bl = read_screenpad_actual_brightness()
-        if type(cur_pad_bl) is int and cur_pad_bl > 0:
-            state["saved_screenpad_brightness"] = cur_pad_bl
-        pad_lua = build_lua_monitor_cmd(PAD_OUTPUT, disabled=True)
-        actions.append(_apply_hypr_lua(pad_lua, dry_run=dry_run))
-        bl_res = _try_set_screenpad_backlight(0, dry_run=dry_run)
-        override_val = "pin-off"
-        notif_msg = "ScreenPad Plus (DP-3) paused & LED backlight OFF — single OLED active"
-    else:  # compute
-        cur_pad_bl = read_screenpad_actual_brightness()
-        if type(cur_pad_bl) is int and cur_pad_bl > 0:
-            state["saved_screenpad_brightness"] = cur_pad_bl
-        pad_lua = build_lua_monitor_cmd(PAD_OUTPUT, disabled=True)
-        actions.append(_apply_hypr_lua(edp_lua, dry_run=dry_run))
-        actions.append(_apply_hypr_lua(pad_lua, dry_run=dry_run))
-        bl_res = _try_set_screenpad_backlight(0, dry_run=dry_run)
-        override_val = "pin-off"
-        notif_msg = "Compute mode: DP-3 & LED backlight OFF, eDP-1 native EDID 3840x2160@60"
 
-    dim_res = None
-    if dim_pct is not None:
-        dim_res = set_primary_brightness_pct(dim_pct, dry_run=dry_run)
+        if mode == "dual":
+            pad_lua = build_lua_monitor_cmd(
+                PAD_OUTPUT, disabled=False, mode=PAD_MODE_FULL, position=PAD_POS, scale=PAD_SCALE_FULL
+            )
+            actions.append(_apply_hypr_lua(edp_lua, dry_run=dry_run))
+            actions.append(_apply_hypr_lua(pad_lua, dry_run=dry_run))
+            restore_val = resolve_screenpad_restore_brightness(state, SCREENPAD_DEFAULT_DUAL_BRIGHTNESS)
+            bl_res = _try_set_screenpad_backlight(restore_val, dry_run=dry_run)
+            override_val = "pin-on"
+            notif_msg = f"Dual 4K + ScreenPad Plus (3840x1100@60, backlight {restore_val}/255) active"
+        elif mode == "pad-half":
+            pad_lua = build_lua_monitor_cmd(
+                PAD_OUTPUT, disabled=False, mode=PAD_MODE_HALF, position=PAD_POS, scale=PAD_SCALE_HALF
+            )
+            actions.append(_apply_hypr_lua(edp_lua, dry_run=dry_run))
+            actions.append(_apply_hypr_lua(pad_lua, dry_run=dry_run))
+            restore_val = resolve_screenpad_restore_brightness(state, SCREENPAD_DEFAULT_HALF_BRIGHTNESS)
+            bl_res = _try_set_screenpad_backlight(restore_val, dry_run=dry_run)
+            override_val = "pin-on"
+            notif_msg = f"ScreenPad Plus half-res (1920x550@60, backlight {restore_val}/255)"
+        elif mode == "single":
+            cur_pad_bl = read_screenpad_actual_brightness()
+            if type(cur_pad_bl) is int and cur_pad_bl > 0:
+                state["saved_screenpad_brightness"] = cur_pad_bl
+            pad_lua = build_lua_monitor_cmd(PAD_OUTPUT, disabled=True)
+            actions.append(_apply_hypr_lua(pad_lua, dry_run=dry_run))
+            bl_res = _try_set_screenpad_backlight(0, dry_run=dry_run)
+            override_val = "pin-off"
+            notif_msg = "ScreenPad Plus (DP-3) paused & LED backlight OFF — single OLED active"
+        else:  # compute
+            cur_pad_bl = read_screenpad_actual_brightness()
+            if type(cur_pad_bl) is int and cur_pad_bl > 0:
+                state["saved_screenpad_brightness"] = cur_pad_bl
+            pad_lua = build_lua_monitor_cmd(PAD_OUTPUT, disabled=True)
+            actions.append(_apply_hypr_lua(edp_lua, dry_run=dry_run))
+            actions.append(_apply_hypr_lua(pad_lua, dry_run=dry_run))
+            bl_res = _try_set_screenpad_backlight(0, dry_run=dry_run)
+            override_val = "pin-off"
+            notif_msg = "Compute mode: DP-3 & LED backlight OFF, eDP-1 native EDID 3840x2160@60"
 
-    # Verify primary eDP-1 remained active when running live
-    primary_verified = True
-    if not dry_run:
-        mons_after = query_monitors()
-        if mons_after:
-            primary_verified = is_output_active(mons_after, PRIMARY_OUTPUT)
-            if not primary_verified:
-                # Emergency safety recovery: re-enable eDP-1 immediately!
-                _apply_hypr_lua(edp_lua, dry_run=False)
-                mons_rec = query_monitors()
-                primary_verified = is_output_active(mons_rec, PRIMARY_OUTPUT)
-            require_ok(primary_verified, "PRIMARY_DISPLAY_RECOVERY_FAILED", "eDP-1 is not active after mode switch")
+        dim_res = None
+        if dim_pct is not None:
+            dim_res = set_primary_brightness_pct(dim_pct, dry_run=dry_run)
 
-    state["last_mode"] = mode
-    state["screen_sleep_active"] = False
-    if not internal_daemon:
-        state["manual_override"] = override_val
-    if not dry_run:
-        save_guard_state(state_path, state)
+        # Verify primary eDP-1 remained active when running live
+        primary_verified = True
+        if not dry_run:
+            mons_after = query_monitors()
+            if mons_after:
+                primary_verified = is_output_active(mons_after, PRIMARY_OUTPUT)
+                if not primary_verified:
+                    # Emergency safety recovery: re-enable eDP-1 immediately!
+                    _apply_hypr_lua(edp_lua, dry_run=False)
+                    mons_rec = query_monitors()
+                    primary_verified = is_output_active(mons_rec, PRIMARY_OUTPUT)
+                require_ok(primary_verified, "PRIMARY_DISPLAY_RECOVERY_FAILED", "eDP-1 is not active after mode switch")
+
+        state["last_mode"] = mode
+        state["screen_sleep_active"] = False
+        if not internal_daemon:
+            state["manual_override"] = override_val
+        if not dry_run:
+            save_guard_state(state_path, state)
 
     notif_res = send_notification("Aletheion Display", notif_msg, dry_run=(dry_run or not notify))
     return {
@@ -561,25 +596,27 @@ def cmd_sleep_all(
         "INVALID_DEBOUNCE_MS",
         f"debounce_ms must be int in 0..{MAX_SLEEP_DEBOUNCE_MS}, got {debounce_ms!r}",
     )
-    state = load_guard_state(state_path)
-    cur_pad_bl = read_screenpad_actual_brightness()
-    if type(cur_pad_bl) is int and cur_pad_bl > 0:
-        state["saved_screenpad_brightness"] = cur_pad_bl
-    state["screen_sleep_active"] = True
+    with _guard_state_lock(state_path, enabled=not dry_run):
+        state = load_guard_state(state_path)
+        cur_pad_bl = read_screenpad_actual_brightness()
+        if type(cur_pad_bl) is int and cur_pad_bl > 0:
+            state["saved_screenpad_brightness"] = cur_pad_bl
+        state["screen_sleep_active"] = True
 
-    if dry_run:
-        return {
-            "action": "sleep-all",
-            "dry_run": True,
-            "debounce_ms": debounce_ms,
-            "saved_screenpad_brightness": state.get("saved_screenpad_brightness"),
-            "screenpad_backlight": _try_set_screenpad_backlight(0, dry_run=True),
-            "dpms_cmd": ["hyprctl", "dispatch", 'hl.dsp.dpms({ action = "disable" })'],
-            "screen_sleep_active": True,
-        }
+        if dry_run:
+            return {
+                "action": "sleep-all",
+                "dry_run": True,
+                "debounce_ms": debounce_ms,
+                "saved_screenpad_brightness": state.get("saved_screenpad_brightness"),
+                "screenpad_backlight": _try_set_screenpad_backlight(0, dry_run=True),
+                "dpms_cmd": ["hyprctl", "dispatch", 'hl.dsp.dpms({ action = "disable" })'],
+                "screen_sleep_active": True,
+            }
 
-    # Persist state BEFORE cutting DPMS so socket2 wake watcher sees screen_sleep_active=True.
-    save_guard_state(state_path, state)
+        # Persist state BEFORE cutting DPMS so socket2 wake watcher sees screen_sleep_active=True.
+        save_guard_state(state_path, state)
+
     if debounce_ms > 0:
         time.sleep(debounce_ms / 1000.0)
     bl_res = _try_set_screenpad_backlight(0, dry_run=False, verify_off=False)
@@ -599,20 +636,21 @@ def cmd_sleep_all(
 
 def cmd_wake_restore(*, state_path: Path, dry_run: bool = False) -> dict[str, Any]:
     """Restore saved ScreenPad backlight after DPMS wake iff DP-3 is active."""
-    state = load_guard_state(state_path)
-    mons = query_monitors()
-    pad_active = is_output_active(mons, PAD_OUTPUT)
-    was_sleeping = bool(state.get("screen_sleep_active", False))
+    with _guard_state_lock(state_path, enabled=not dry_run):
+        state = load_guard_state(state_path)
+        mons = query_monitors()
+        pad_active = is_output_active(mons, PAD_OUTPUT)
+        was_sleeping = bool(state.get("screen_sleep_active", False))
 
-    if pad_active:
-        target = resolve_screenpad_restore_brightness(state, SCREENPAD_DEFAULT_DUAL_BRIGHTNESS)
-    else:
-        target = 0
+        if pad_active:
+            target = resolve_screenpad_restore_brightness(state, SCREENPAD_DEFAULT_DUAL_BRIGHTNESS)
+        else:
+            target = 0
 
-    bl_res = _try_set_screenpad_backlight(target, dry_run=dry_run, verify_off=(target == 0))
-    state["screen_sleep_active"] = False
-    if not dry_run:
-        save_guard_state(state_path, state)
+        bl_res = _try_set_screenpad_backlight(target, dry_run=dry_run, verify_off=(target == 0))
+        state["screen_sleep_active"] = False
+        if not dry_run:
+            save_guard_state(state_path, state)
     return {
         "action": "wake-restore",
         "dry_run": dry_run,
@@ -678,11 +716,10 @@ def cmd_focus_deck(*, state_path: Path, dry_run: bool = False) -> dict[str, Any]
             "err": err,
         }
 
-    # Resolve installed binary cleanly without relying on shell expansion.
+    # Resolve installed binary cleanly (no untrusted build-tree fallback; shell+Lua quoted).
     cand_bins = [
         shutil.which("aletheia-deck"),
         str(Path.home() / ".local" / "bin" / "aletheia-deck"),
-        str(Path.home() / "Work" / "aletheia-deck" / "build" / "aletheia-deck"),
     ]
     deck_bin = next((b for b in cand_bins if b and Path(b).is_file() and os.access(b, os.X_OK)), None)
     if deck_bin is None:
@@ -690,8 +727,9 @@ def cmd_focus_deck(*, state_path: Path, dry_run: bool = False) -> dict[str, Any]
         return {"action": "focus-deck", "dry_run": False, "mode": "missing_binary", "ok": False}
 
     # Hyprland window rule pins aletheia-deck to DP-3 workspace 19 (slot 9 of block 1).
-    safe_bin = deck_bin.replace("\\", "\\\\").replace('"', '\\"')
-    rc, out, err = _run_cmd(["hyprctl", "eval", f'hl.exec_cmd("{safe_bin}")'])
+    sh_quoted = shlex.quote(deck_bin)
+    lua_quoted = sh_quoted.replace("\\", "\\\\").replace('"', '\\"')
+    rc, out, err = _run_cmd(["hyprctl", "eval", f'hl.exec_cmd("{lua_quoted}")'])
     return {
         "action": "focus-deck",
         "dry_run": False,
@@ -877,10 +915,11 @@ def main(argv: list[str] | None = None) -> int:
                 notify=not args.no_notify,
             )
         else:  # auto (validated by argparse choices)
-            state = load_guard_state(state_path)
-            state["manual_override"] = None
-            if not args.dry_run:
-                save_guard_state(state_path, state)
+            with _guard_state_lock(state_path, enabled=not args.dry_run):
+                state = load_guard_state(state_path)
+                state["manual_override"] = None
+                if not args.dry_run:
+                    save_guard_state(state_path, state)
             notif = send_notification(
                 "Aletheion Display",
                 "Automatic hysteretic thermal-display control re-enabled",

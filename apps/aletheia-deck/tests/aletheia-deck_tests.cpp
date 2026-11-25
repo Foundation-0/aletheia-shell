@@ -142,6 +142,11 @@ private slots:
                   QStringLiteral("{\"read_ids\":[\"%1\"]}\n").arg(msgId).toUtf8());
         backend.refreshNow();
         QCOMPARE(backend.sentMessages().first().toMap().value("delivered").toBool(), true);
+
+        // Oversized inbox text is bounded safely below 8 KiB
+        const QString huge(10000, QLatin1Char('Z'));
+        QVERIFY(backend.sendToCoordinator(huge, "message"));
+        QVERIFY(backend.sentMessages().first().toMap().value("text").toString().size() <= 1800);
     }
 
     void backendParsesQueueAndPinsCard() {

@@ -583,9 +583,13 @@ void DeckBackend::reloadInboxAndAck() {
 }
 
 bool DeckBackend::sendToCoordinator(const QString &text, const QString &kind) {
-    const QString cleaned = text.trimmed();
+    QString cleaned = text.trimmed();
     if (cleaned.isEmpty())
         return false;
+    // Cap length safely below the bridge hook's 8 KiB per-line read cap even after JSON escaping.
+    constexpr int kMaxInboxMessageChars = 1800;
+    if (cleaned.size() > kMaxInboxMessageChars)
+        cleaned = cleaned.left(kMaxInboxMessageChars).trimmed();
 
     QDir().mkpath(QFileInfo(m_inboxPath).absolutePath());
     QFile inbox(m_inboxPath);
@@ -667,16 +671,22 @@ bool DeckBackend::addTrackIdea(const QString &ideaText) {
 
 void DeckBackend::sleepAllScreens() {
     if (m_displayBin.isEmpty() || !QFileInfo::exists(m_displayBin)) {
-        setStatusBanner(tr("aletheion-display not found at %1").arg(m_displayBin));
+        setStatusBanner(m_displayBin.isEmpty()
+            ? tr("aletheion-display not found in ~/.local/bin or PATH")
+            : tr("aletheion-display not found at %1").arg(m_displayBin));
         return;
     }
-    QProcess::startDetached(m_displayBin, {QStringLiteral("sleep-all"), QStringLiteral("--no-notify")});
+    if (!QProcess::startDetached(m_displayBin, {QStringLiteral("sleep-all"), QStringLiteral("--no-notify")}))
+        setStatusBanner(tr("Failed to start %1 sleep-all").arg(m_displayBin));
 }
 
 void DeckBackend::toggleScreenPad() {
     if (m_displayBin.isEmpty() || !QFileInfo::exists(m_displayBin)) {
-        setStatusBanner(tr("aletheion-display not found at %1").arg(m_displayBin));
+        setStatusBanner(m_displayBin.isEmpty()
+            ? tr("aletheion-display not found in ~/.local/bin or PATH")
+            : tr("aletheion-display not found at %1").arg(m_displayBin));
         return;
     }
-    QProcess::startDetached(m_displayBin, {QStringLiteral("toggle-pad")});
+    if (!QProcess::startDetached(m_displayBin, {QStringLiteral("toggle-pad")}))
+        setStatusBanner(tr("Failed to start %1 toggle-pad").arg(m_displayBin));
 }

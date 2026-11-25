@@ -633,6 +633,7 @@ ApplicationWindow {
                                     id: ideaField
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 40
+                                    maximumLength: 1800
                                     placeholderText: qsTr("New hypothesis or track idea (SOP-12)...")
                                     font.pixelSize: 12
                                     color: theme.foreground
@@ -795,6 +796,7 @@ ApplicationWindow {
                                             id: cardNoteField
                                             Layout.fillWidth: true
                                             Layout.preferredHeight: 38
+                                            maximumLength: 1800
                                             placeholderText: qsTr("Note for %1 -> Coordinator...").arg(modelData.id)
                                             font.pixelSize: 12
                                             color: theme.foreground
@@ -1012,6 +1014,7 @@ ApplicationWindow {
                                         id: coordInput
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 42
+                                        maximumLength: 1800
                                         placeholderText: qsTr("Write directly to @coordinator (Ctrl+Enter)...")
                                         font.pixelSize: 13
                                         color: theme.foreground

@@ -31,8 +31,10 @@ Policy (UX582HS):
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 from dataclasses import dataclass
 import errno
+import fcntl
 import glob
 import hashlib
 import json
@@ -46,7 +48,7 @@ import subprocess
 import sys
 import threading
 import time
-from typing import Any
+from typing import Any, Iterator
 
 
 DEFAULT_POLL_S = 5
@@ -88,14 +90,25 @@ def clamp_safe_brightness_pct(pct: int) -> int:
 
 
 def compute_shed_target_pct(cur_pct: int, shed_brightness_pct: int) -> int:
-    """Never brighten an already-dim OLED during thermal shed: target = clamp(min(cur_pct, shed_pct))."""
-    require_ok(type(cur_pct) is int, "INVALID_BRIGHTNESS_TYPE", f"expected exact int cur_pct, got {type(cur_pct).__name__}")
+    """Never brighten an already-dim OLED during thermal shed.
+
+    When cur_pct <= shed_brightness_pct (including <20% user settings like 5% or 10%),
+    keep cur_pct untouched. Only apply the MIN_BRIGHTNESS_FLOOR_PCT safety floor when
+    actively lowering brightness (cur_pct > shed_brightness_pct).
+    """
+    require_ok(
+        type(cur_pct) is int and 0 <= cur_pct <= 100,
+        "INVALID_BRIGHTNESS_TYPE",
+        f"expected exact int cur_pct in 0..100, got {cur_pct!r}",
+    )
     require_ok(
         type(shed_brightness_pct) is int,
         "INVALID_BRIGHTNESS_TYPE",
         f"expected exact int shed_brightness_pct, got {type(shed_brightness_pct).__name__}",
     )
-    return clamp_safe_brightness_pct(min(cur_pct, shed_brightness_pct))
+    if cur_pct <= shed_brightness_pct:
+        return cur_pct
+    return clamp_safe_brightness_pct(shed_brightness_pct)
 
 
 def parse_dpms_wake_event(line: str) -> str | None:
@@ -358,10 +371,12 @@ def read_cpu_gpu_temps() -> tuple[int, int]:
 
 
 def read_intel_backlight_pct() -> int:
+    """Return true un-clamped OLED brightness percentage in [0, 100]."""
     cur_i = _parse_ascii_uint(_read_text(Path("/sys/class/backlight/intel_backlight/brightness")))
     max_i = _parse_ascii_uint(_read_text(Path("/sys/class/backlight/intel_backlight/max_brightness")))
     if cur_i is not None and max_i is not None and max_i > 0:
-        return clamp_safe_brightness_pct((100 * cur_i + max_i // 2) // max_i)
+        pct = (100 * cur_i + max_i // 2) // max_i
+        return max(0, min(100, pct))
     return 100
 
 
@@ -379,6 +394,37 @@ def _is_pad_output_active() -> bool:
     except ValueError:
         return False
     return False
+
+
+@contextmanager
+def _guard_state_lock(state_path: Path, *, enabled: bool) -> Iterator[None]:
+    """Advisory flock on `.display_guard.lock` preventing concurrent daemon/socket2/CLI races."""
+    if not enabled:
+        yield
+        return
+    parent_fd = _open_state_parent_fd(state_path.parent, create_missing=True)
+    lock_fd = -1
+    try:
+        try:
+            lock_fd = os.open(
+                f".{state_path.name}.lock",
+                os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW,
+                0o600,
+                dir_fd=parent_fd,
+            )
+        except OSError as exc:
+            if exc.errno == errno.ELOOP:
+                raise GuardDaemonError("SYMLINK_FORBIDDEN", f"lock file is symlink: {state_path}") from exc
+            raise GuardDaemonError("STATE_LOCK_ERROR", f"cannot open lock file for {state_path}: {exc}") from exc
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        if lock_fd >= 0:
+            try:
+                fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            finally:
+                os.close(lock_fd)
+        os.close(parent_fd)
 
 
 def load_state(state_path: Path) -> dict[str, Any]:
@@ -498,26 +544,27 @@ def handle_dpms_wake(
     pad_active_override: bool | None = None,
 ) -> dict[str, Any]:
     """Restore saved ScreenPad backlight on DPMS wake unless DP-3 is intentionally disabled."""
-    state = load_state(state_path)
-    if not bool(state.get("screen_sleep_active", False)):
-        return {"handled": False, "reason": "not_in_screen_sleep", "output": output_name}
+    with _guard_state_lock(state_path, enabled=not dry_run):
+        state = load_state(state_path)
+        if not bool(state.get("screen_sleep_active", False)):
+            return {"handled": False, "reason": "not_in_screen_sleep", "output": output_name}
 
-    pad_active = _is_pad_output_active() if pad_active_override is None else bool(pad_active_override)
-    saved = state.get("saved_screenpad_brightness")
-    restore_val = saved if (type(saved) is int and 1 <= saved <= SCREENPAD_MAX_BRIGHTNESS) else SCREENPAD_DEFAULT_RESTORE
-    target_val = restore_val if pad_active else 0
+        pad_active = _is_pad_output_active() if pad_active_override is None else bool(pad_active_override)
+        saved = state.get("saved_screenpad_brightness")
+        restore_val = saved if (type(saved) is int and 1 <= saved <= SCREENPAD_MAX_BRIGHTNESS) else SCREENPAD_DEFAULT_RESTORE
+        target_val = restore_val if pad_active else 0
 
-    state["screen_sleep_active"] = False
-    if dry_run:
-        return {
-            "handled": True,
-            "dry_run": True,
-            "output": output_name,
-            "pad_active": pad_active,
-            "target_screenpad_brightness": target_val,
-        }
+        state["screen_sleep_active"] = False
+        if dry_run:
+            return {
+                "handled": True,
+                "dry_run": True,
+                "output": output_name,
+                "pad_active": pad_active,
+                "target_screenpad_brightness": target_val,
+            }
 
-    save_state(state_path, state)
+        save_state(state_path, state)
     rc, out, err = _run_cmd(["brightnessctl", "-d", "asus_screenpad", "set", str(target_val)])
     return {
         "handled": True,
@@ -592,23 +639,25 @@ def execute_transition(
     state_path: Path,
     dry_run: bool,
 ) -> dict[str, Any]:
-    state = load_state(state_path)
     disp = _display_bin()
     disp_cmd_prefix = [disp] if os.access(disp, os.X_OK) else [sys.executable, "-I", "-B", disp]
 
     if decision == "SHED":
-        cur_pct = read_intel_backlight_pct()
-        target_pct = compute_shed_target_pct(cur_pct, cfg.shed_brightness_pct)
-        state["saved_brightness_pct"] = cur_pct
-        state["shed_active"] = True
-        msg = f"Aletheion Thermal Guard: TCPU {t_cpu_c}°C / GPU {t_gpu_c}°C — dimmed OLED to {target_pct}% & paused ScreenPad Plus"
-        if dry_run:
-            return {
-                "executed": False, "dry_run": True, "decision": "SHED",
-                "saved_brightness_pct": cur_pct, "target_brightness_pct": target_pct, "message": msg,
-            }
-        save_state(state_path, state)
-        _run_cmd(["brightnessctl", "-d", "intel_backlight", "set", f"{target_pct}%"])
+        with _guard_state_lock(state_path, enabled=not dry_run):
+            state = load_state(state_path)
+            cur_pct = read_intel_backlight_pct()
+            target_pct = compute_shed_target_pct(cur_pct, cfg.shed_brightness_pct)
+            state["saved_brightness_pct"] = cur_pct
+            state["shed_active"] = True
+            msg = f"Aletheion Thermal Guard: TCPU {t_cpu_c}°C / GPU {t_gpu_c}°C — OLED {target_pct}% & paused ScreenPad Plus"
+            if dry_run:
+                return {
+                    "executed": False, "dry_run": True, "decision": "SHED",
+                    "saved_brightness_pct": cur_pct, "target_brightness_pct": target_pct, "message": msg,
+                }
+            save_state(state_path, state)
+        if target_pct < cur_pct:
+            _run_cmd(["brightnessctl", "-d", "intel_backlight", "set", f"{target_pct}%"])
         _run_cmd([*disp_cmd_prefix, "mode", "single", "--internal-daemon", "--no-notify"])
         if shutil.which("notify-send"):
             _run_cmd(["notify-send", "-a", "Aletheion Thermal Guard", "Thermal Display Shed", msg])
@@ -618,16 +667,21 @@ def execute_transition(
         }
 
     if decision == "RESTORE":
-        saved = state.get("saved_brightness_pct")
-        restore_pct = clamp_safe_brightness_pct(saved if type(saved) is int else 80)
-        state["shed_active"] = False
-        msg = f"Aletheion Thermal Guard: Cooled (TCPU {t_cpu_c}°C / GPU {t_gpu_c}°C) — restored OLED to {restore_pct}% & ScreenPad Plus"
-        if dry_run:
-            return {
-                "executed": False, "dry_run": True, "decision": "RESTORE",
-                "restore_brightness_pct": restore_pct, "message": msg,
-            }
-        save_state(state_path, state)
+        with _guard_state_lock(state_path, enabled=not dry_run):
+            state = load_state(state_path)
+            saved = state.get("saved_brightness_pct")
+            if type(saved) is int and 0 <= saved <= 100:
+                restore_pct = saved
+            else:
+                restore_pct = 80
+            state["shed_active"] = False
+            msg = f"Aletheion Thermal Guard: Cooled (TCPU {t_cpu_c}°C / GPU {t_gpu_c}°C) — restored OLED to {restore_pct}% & ScreenPad Plus"
+            if dry_run:
+                return {
+                    "executed": False, "dry_run": True, "decision": "RESTORE",
+                    "restore_brightness_pct": restore_pct, "message": msg,
+                }
+            save_state(state_path, state)
         _run_cmd(["brightnessctl", "-d", "intel_backlight", "set", f"{restore_pct}%"])
         _run_cmd([*disp_cmd_prefix, "mode", "dual", "--internal-daemon", "--no-notify"])
         if shutil.which("notify-send"):
@@ -670,7 +724,8 @@ def run_self_test() -> dict[str, Any]:
         HysteresisConfig(shed_brightness_pct=10).validate()
     except GuardDaemonError:
         refused_bad_cfg = True
-    # 8. Never brighten already-dim OLED during shed: min(20, 35) == 20, min(80, 35) == 35
+    # 8. Never brighten already-dim OLED during shed (including <20% like 5% or 10%!)
+    shed_dim_5 = compute_shed_target_pct(5, 35)
     shed_dim_20 = compute_shed_target_pct(20, 35)
     shed_dim_80 = compute_shed_target_pct(80, 35)
     # 9. Hyprland socket2 DPMS wake parser
@@ -691,6 +746,7 @@ def run_self_test() -> dict[str, Any]:
         and clamp_safe_brightness_pct(15) == MIN_BRIGHTNESS_FLOOR_PCT
         and clamp_safe_brightness_pct(100) == 100
         and refused_bad_cfg
+        and shed_dim_5 == 5
         and shed_dim_20 == 20
         and shed_dim_80 == 35
         and wake_edp == "eDP-1"

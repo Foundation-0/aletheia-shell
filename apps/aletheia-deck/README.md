@@ -25,3 +25,7 @@ Native C++/Qt6 Omarchy touchscreen deck built for the ASUS ZenBook Pro Duo UX582
 ./bin/test
 ./bin/install
 ```
+
+## Screen Sleep & Wake Note
+
+The **Sleep All** action calls `aletheion-display sleep-all`, which turns off both `eDP-1` (DPMS) and the `asus_screenpad` hardware LED backlight (`0/255`). Automatic backlight restoration on activity wake is handled by the `aletheion-therm-display-guard.service` Hyprland `.socket2.sock` watcher; if that user daemon is stopped, run `aletheion-display wake-restore` after waking.

@@ -15,6 +15,8 @@ fast (<200 ms), fail-open `{}` on any error.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
+import fcntl
 import hashlib
 import json
 import os
@@ -25,7 +27,7 @@ import shutil
 import subprocess
 import sys
 import time
-from typing import Any
+from typing import Any, Iterator
 
 
 TAIL_READ_BYTES = 786432
@@ -58,10 +60,38 @@ def default_state_dir() -> Path:
     return Path.home() / ".local" / "state" / "aletheia-deck"
 
 
+@contextmanager
+def _state_lock(state_dir: Path) -> Iterator[None]:
+    state_dir.mkdir(parents=True, mode=0o700, exist_ok=True)
+    lock_path = state_dir / ".bridge.lock"
+    fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        finally:
+            os.close(fd)
+
+
+def _fsync_dir(directory: Path) -> None:
+    dir_fd = -1
+    try:
+        dir_fd = os.open(str(directory), os.O_RDONLY | os.O_DIRECTORY)
+        os.fsync(dir_fd)
+    except OSError:
+        pass
+    finally:
+        if dir_fd >= 0:
+            os.close(dir_fd)
+
+
 def _atomic_write_text(path: Path, content: str, mode: int = 0o600) -> None:
     path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
     tmp = path.parent / f".{path.name}.{os.getpid()}.{secrets.token_hex(6)}.tmp"
     fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, mode)
+    closed = False
     try:
         os.fchmod(fd, mode)
         raw = content.encode("utf-8")
@@ -73,16 +103,18 @@ def _atomic_write_text(path: Path, content: str, mode: int = 0o600) -> None:
                 raise OSError("short write")
             pos += n
         os.fsync(fd)
-    except Exception:
         os.close(fd)
+        closed = True
+        os.replace(str(tmp), str(path))
+        _fsync_dir(path.parent)
+    except Exception:
+        if not closed:
+            os.close(fd)
         try:
             tmp.unlink()
         except OSError:
             pass
         raise
-    else:
-        os.close(fd)
-        os.replace(str(tmp), str(path))
 
 
 def _atomic_write_json(path: Path, data: dict[str, Any]) -> None:
@@ -373,8 +405,27 @@ def read_gpu_lease_status() -> dict[str, Any]:
     return {"held": False, "holder": None, "source": "unavailable"}
 
 
+def _is_worker_transcript(transcript_raw: Any) -> bool:
+    if not isinstance(transcript_raw, str) or not transcript_raw.strip():
+        return False
+    p = Path(transcript_raw)
+    if not p.is_file():
+        return False
+    try:
+        with p.open("rb") as fh:
+            head = fh.read(16384).decode("utf-8", errors="replace")
+        return (
+            "You have just started. Your assignment (recorded on the board" in head
+            or "<swarm_worker>" in head
+        )
+    except OSError:
+        return False
+
+
 def _sync_coordinator_doc_hash(payload: dict[str, Any], cartography_dir: Path, state_dir: Path) -> None:
-    """If the tool call just edited SHARED_WORKSPACE.md, record its new hash so PreInvocation won't echo it."""
+    """If the Coordinator itself just edited SHARED_WORKSPACE.md, record its new hash so PreInvocation won't echo it."""
+    if _is_worker_transcript(payload.get("transcriptPath")):
+        return
     tc = payload.get("toolCall")
     if not isinstance(tc, dict):
         return
@@ -394,12 +445,13 @@ def _sync_coordinator_doc_hash(payload: dict[str, Any], cartography_dir: Path, s
     if not doc_path.is_file():
         return
     try:
-        digest = hashlib.sha256(doc_path.read_bytes()[:MAX_DOC_BYTES]).hexdigest()
-        st = _read_json_file(state_dir / "bridge_state.json")
-        st["last_seen_doc_sha256"] = digest
-        st["updated_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        _atomic_write_json(state_dir / "bridge_state.json", st)
-        _atomic_write_text(state_dir / "last_seen_doc_sha256", f"{digest}\n")
+        with _state_lock(state_dir):
+            digest = hashlib.sha256(doc_path.read_bytes()[:MAX_DOC_BYTES]).hexdigest()
+            st = _read_json_file(state_dir / "bridge_state.json")
+            st["last_seen_doc_sha256"] = digest
+            st["updated_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            _atomic_write_json(state_dir / "bridge_state.json", st)
+            _atomic_write_text(state_dir / "last_seen_doc_sha256", f"{digest}\n")
     except OSError:
         pass
 
