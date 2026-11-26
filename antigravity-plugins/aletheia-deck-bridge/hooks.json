@@ -1,0 +1,27 @@
+{
+  "aletheia-deck-inbox": {
+    "enabled": true,
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "python3 -I -B ./scripts/pre_invocation_inbox.py",
+        "timeout": 4
+      }
+    ]
+  },
+  "aletheia-deck-feed-sync": {
+    "enabled": true,
+    "PostToolUse": [
+      {
+        "matcher": "post_message|read_board|swarm|edit_file|write_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I -B ./scripts/post_tool_sync_deck.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

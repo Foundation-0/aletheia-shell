@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
 """
-`aletheion-therm-display-guard` — Automatic Hysteretic
-Thermal-Display Governor Daemon (Schmitt Trigger, <0.1% CPU, Zero Flicker).
+Track S52 & EXP-Q17a: `aletheion-therm-display-guard` — Automatic Hysteretic
+Thermal-Display Governor Daemon + Hyprland DPMS Wake Backlight Restorer
+(Schmitt Trigger, <0.1% CPU, Zero Flicker).
 
 Policy (UX582HS):
   - Poll every 5s (configurable).
   - Shed trigger:   T_cpu >= 88 C OR T_gpu >= 80 C sustained for >= 15s:
-      * Save current `intel_backlight` percent to $XDG_STATE_HOME/aletheion/display_guard.json
-      * Dim `intel_backlight` to 35% (safety floor >= 20%, NEVER 0% dark!)
-      * Pause lower ScreenPad Plus (`DP-3`) via `aletheion-display mode single --internal-daemon`
+      * Save current `intel_backlight` percent to ~/.local/state/aletheion/display_guard.json
+      * Dim `intel_backlight` to min(cur_pct, 35%) (safety floor >= 20%, NEVER brightens an already-dim OLED!)
+      * Pause lower ScreenPad Plus (`DP-3`) AND cut `asus_screenpad` hardware backlight to 0
+        via `aletheion-display mode single --internal-daemon`
       * Emit one clean `notify-send` notification explaining why
   - Restore trigger: T_cpu <= 76 C AND T_gpu <= 70 C sustained for >= 30s:
       * Restore saved `intel_backlight` percent (clamped [20%, 100%])
-      * Re-enable `DP-3` (`3840x1100@60 at 0x1080 scale 2`) via `aletheion-display mode dual --internal-daemon`
+      * Re-enable `DP-3` (`3840x1100@60 at 0x1080 scale 2`) & restore saved `asus_screenpad` backlight
+        via `aletheion-display mode dual --internal-daemon`
       * Emit one clean restore notification
+  - Hyprland `.socket2.sock` DPMS wake watcher thread (0.0% idle CPU):
+      * Listens for `dpms>>eDP-1,1` / `dpms>>DP-3,1` (and `dpmsv2>>...`)
+      * When waking from `sleep-all` (`screen_sleep_active == True`), clears sleep flag and
+        immediately restores `asus_screenpad` backlight to `saved_screenpad_brightness` iff `DP-3`
+        is enabled (or enforces `0` if `DP-3` is intentionally disabled in `single`/`compute` mode!).
   - Manual override respected: if state file records `manual_override` (`pin-on` or `pin-off`
     from physical ScreenPad button or `aletheion-display toggle-pad`), daemon NEVER fights the user
     until `aletheion-display auto` clears `manual_override`.
@@ -23,8 +31,10 @@ Policy (UX582HS):
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 from dataclasses import dataclass
 import errno
+import fcntl
 import glob
 import hashlib
 import json
@@ -32,11 +42,13 @@ import os
 from pathlib import Path
 import secrets
 import shutil
+import socket
 import stat
 import subprocess
 import sys
+import threading
 import time
-from typing import Any
+from typing import Any, Iterator
 
 
 DEFAULT_POLL_S = 5
@@ -48,6 +60,10 @@ DEFAULT_RESTORE_GPU_C = 70
 DEFAULT_RESTORE_HOLD_S = 30
 DEFAULT_SHED_BRIGHTNESS_PCT = 35
 MIN_BRIGHTNESS_FLOOR_PCT = 20
+SCREENPAD_DEFAULT_RESTORE = 180
+SCREENPAD_MAX_BRIGHTNESS = 255
+PAD_OUTPUT = "DP-3"
+PRIMARY_OUTPUT = "eDP-1"
 
 
 class GuardDaemonError(ValueError):
@@ -71,6 +87,48 @@ def clamp_safe_brightness_pct(pct: int) -> int:
     if pct > 100:
         return 100
     return pct
+
+
+def compute_shed_target_pct(cur_pct: int, shed_brightness_pct: int) -> int:
+    """Never brighten an already-dim OLED during thermal shed.
+
+    When cur_pct <= shed_brightness_pct (including <20% user settings like 5% or 10%),
+    keep cur_pct untouched. Only apply the MIN_BRIGHTNESS_FLOOR_PCT safety floor when
+    actively lowering brightness (cur_pct > shed_brightness_pct).
+    """
+    require_ok(
+        type(cur_pct) is int and 0 <= cur_pct <= 100,
+        "INVALID_BRIGHTNESS_TYPE",
+        f"expected exact int cur_pct in 0..100, got {cur_pct!r}",
+    )
+    require_ok(
+        type(shed_brightness_pct) is int,
+        "INVALID_BRIGHTNESS_TYPE",
+        f"expected exact int shed_brightness_pct, got {type(shed_brightness_pct).__name__}",
+    )
+    if cur_pct <= shed_brightness_pct:
+        return cur_pct
+    return clamp_safe_brightness_pct(shed_brightness_pct)
+
+
+def parse_dpms_wake_event(line: str) -> str | None:
+    """Parse a Hyprland socket2 event line; return monitor name iff it is a DPMS-on wake for eDP-1 or DP-3."""
+    if not isinstance(line, str):
+        return None
+    text = line.strip()
+    if text.startswith("dpms>>"):
+        payload = text[len("dpms>>"):]
+    elif text.startswith("dpmsv2>>"):
+        payload = text[len("dpmsv2>>"):]
+    else:
+        return None
+    parts = [p.strip() for p in payload.split(",")]
+    if len(parts) < 2:
+        return None
+    output_name, dpms_state = parts[0], parts[1]
+    if output_name in (PRIMARY_OUTPUT, PAD_OUTPUT) and dpms_state in ("1", "on", "true"):
+        return output_name
+    return None
 
 
 @dataclass
@@ -245,6 +303,16 @@ def _discover_env() -> dict[str, str]:
     return env
 
 
+def _discover_hypr_socket2() -> Path | None:
+    env = _discover_env()
+    sig = env.get("HYPRLAND_INSTANCE_SIGNATURE", "").strip()
+    runtime_dir = env.get("XDG_RUNTIME_DIR", "").strip()
+    if not sig or not runtime_dir:
+        return None
+    sock = Path(runtime_dir) / "hypr" / sig / ".socket2.sock"
+    return sock if sock.exists() else None
+
+
 def _run_cmd(cmd: list[str], *, timeout: int = 8) -> tuple[int, str, str]:
     try:
         proc = subprocess.run(cmd, env=_discover_env(), capture_output=True, text=True, timeout=timeout, check=False)
@@ -303,11 +371,60 @@ def read_cpu_gpu_temps() -> tuple[int, int]:
 
 
 def read_intel_backlight_pct() -> int:
+    """Return true un-clamped OLED brightness percentage in [0, 100]."""
     cur_i = _parse_ascii_uint(_read_text(Path("/sys/class/backlight/intel_backlight/brightness")))
     max_i = _parse_ascii_uint(_read_text(Path("/sys/class/backlight/intel_backlight/max_brightness")))
     if cur_i is not None and max_i is not None and max_i > 0:
-        return clamp_safe_brightness_pct((100 * cur_i + max_i // 2) // max_i)
+        pct = (100 * cur_i + max_i // 2) // max_i
+        return max(0, min(100, pct))
     return 100
+
+
+def _is_pad_output_active() -> bool:
+    rc, out, _ = _run_cmd(["hyprctl", "monitors", "all", "-j"])
+    if rc != 0 or not out:
+        return False
+    try:
+        mons = json.loads(out)
+        if not isinstance(mons, list):
+            return False
+        for m in mons:
+            if isinstance(m, dict) and m.get("name") == PAD_OUTPUT and not bool(m.get("disabled", False)):
+                return True
+    except ValueError:
+        return False
+    return False
+
+
+@contextmanager
+def _guard_state_lock(state_path: Path, *, enabled: bool) -> Iterator[None]:
+    """Advisory flock on `.display_guard.lock` preventing concurrent daemon/socket2/CLI races."""
+    if not enabled:
+        yield
+        return
+    parent_fd = _open_state_parent_fd(state_path.parent, create_missing=True)
+    lock_fd = -1
+    try:
+        try:
+            lock_fd = os.open(
+                f".{state_path.name}.lock",
+                os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW,
+                0o600,
+                dir_fd=parent_fd,
+            )
+        except OSError as exc:
+            if exc.errno == errno.ELOOP:
+                raise GuardDaemonError("SYMLINK_FORBIDDEN", f"lock file is symlink: {state_path}") from exc
+            raise GuardDaemonError("STATE_LOCK_ERROR", f"cannot open lock file for {state_path}: {exc}") from exc
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        if lock_fd >= 0:
+            try:
+                fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            finally:
+                os.close(lock_fd)
+        os.close(parent_fd)
 
 
 def load_state(state_path: Path) -> dict[str, Any]:
@@ -316,6 +433,8 @@ def load_state(state_path: Path) -> dict[str, Any]:
         "manual_override": None,
         "shed_active": False,
         "saved_brightness_pct": None,
+        "saved_screenpad_brightness": None,
+        "screen_sleep_active": False,
         "last_mode": "dual",
         "updated_utc": None,
     }
@@ -417,6 +536,100 @@ def _display_bin() -> str:
     return str(sibling)
 
 
+def handle_dpms_wake(
+    output_name: str,
+    *,
+    state_path: Path,
+    dry_run: bool = False,
+    pad_active_override: bool | None = None,
+) -> dict[str, Any]:
+    """Restore saved ScreenPad backlight on DPMS wake unless DP-3 is intentionally disabled."""
+    with _guard_state_lock(state_path, enabled=not dry_run):
+        state = load_state(state_path)
+        if not bool(state.get("screen_sleep_active", False)):
+            return {"handled": False, "reason": "not_in_screen_sleep", "output": output_name}
+
+        pad_active = _is_pad_output_active() if pad_active_override is None else bool(pad_active_override)
+        saved = state.get("saved_screenpad_brightness")
+        restore_val = saved if (type(saved) is int and 1 <= saved <= SCREENPAD_MAX_BRIGHTNESS) else SCREENPAD_DEFAULT_RESTORE
+        target_val = restore_val if pad_active else 0
+
+        state["screen_sleep_active"] = False
+        if dry_run:
+            return {
+                "handled": True,
+                "dry_run": True,
+                "output": output_name,
+                "pad_active": pad_active,
+                "target_screenpad_brightness": target_val,
+            }
+
+        save_state(state_path, state)
+    rc, out, err = _run_cmd(["brightnessctl", "-d", "asus_screenpad", "set", str(target_val)])
+    return {
+        "handled": True,
+        "dry_run": False,
+        "output": output_name,
+        "pad_active": pad_active,
+        "target_screenpad_brightness": target_val,
+        "brightnessctl_ok": rc == 0,
+        "out": out,
+        "err": err,
+    }
+
+
+def _dpms_wake_watcher_loop(state_path: Path, dry_run: bool, stop_event: threading.Event) -> None:
+    """Zero-CPU blocking reader on Hyprland `.socket2.sock` that restores ScreenPad backlight on DPMS wake."""
+    while not stop_event.is_set():
+        sock_path = _discover_hypr_socket2()
+        if sock_path is None:
+            stop_event.wait(2.0)
+            continue
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        try:
+            sock.settimeout(5.0)
+            sock.connect(str(sock_path))
+            buf = b""
+            while not stop_event.is_set():
+                try:
+                    chunk = sock.recv(4096)
+                except socket.timeout:
+                    continue
+                if not chunk:
+                    break
+                buf += chunk
+                while b"\n" in buf:
+                    raw_line, buf = buf.split(b"\n", 1)
+                    line = raw_line.decode("utf-8", errors="replace")
+                    out_name = parse_dpms_wake_event(line)
+                    if out_name is not None:
+                        try:
+                            res = handle_dpms_wake(out_name, state_path=state_path, dry_run=dry_run)
+                            if res.get("handled"):
+                                sys.stdout.write(
+                                    json.dumps(
+                                        {
+                                            "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                                            "event": "dpms_wake",
+                                            "result": res,
+                                        },
+                                        sort_keys=True,
+                                    )
+                                    + "\n"
+                                )
+                                sys.stdout.flush()
+                        except Exception as exc:
+                            sys.stderr.write(f"WARN dpms_wake_handler: {exc}\n")
+                            sys.stderr.flush()
+        except OSError:
+            stop_event.wait(2.0)
+        finally:
+            try:
+                sock.close()
+            except OSError:
+                pass
+
+
 def execute_transition(
     decision: str,
     *,
@@ -426,23 +639,25 @@ def execute_transition(
     state_path: Path,
     dry_run: bool,
 ) -> dict[str, Any]:
-    state = load_state(state_path)
     disp = _display_bin()
     disp_cmd_prefix = [disp] if os.access(disp, os.X_OK) else [sys.executable, "-I", "-B", disp]
 
     if decision == "SHED":
-        cur_pct = read_intel_backlight_pct()
-        target_pct = clamp_safe_brightness_pct(cfg.shed_brightness_pct)
-        state["saved_brightness_pct"] = cur_pct
-        state["shed_active"] = True
-        msg = f"Aletheion Thermal Guard: TCPU {t_cpu_c}°C / GPU {t_gpu_c}°C — dimmed OLED to {target_pct}% & paused ScreenPad Plus"
-        if dry_run:
-            return {
-                "executed": False, "dry_run": True, "decision": "SHED",
-                "saved_brightness_pct": cur_pct, "target_brightness_pct": target_pct, "message": msg,
-            }
-        save_state(state_path, state)
-        _run_cmd(["brightnessctl", "-d", "intel_backlight", "set", f"{target_pct}%"])
+        with _guard_state_lock(state_path, enabled=not dry_run):
+            state = load_state(state_path)
+            cur_pct = read_intel_backlight_pct()
+            target_pct = compute_shed_target_pct(cur_pct, cfg.shed_brightness_pct)
+            state["saved_brightness_pct"] = cur_pct
+            state["shed_active"] = True
+            msg = f"Aletheion Thermal Guard: TCPU {t_cpu_c}°C / GPU {t_gpu_c}°C — OLED {target_pct}% & paused ScreenPad Plus"
+            if dry_run:
+                return {
+                    "executed": False, "dry_run": True, "decision": "SHED",
+                    "saved_brightness_pct": cur_pct, "target_brightness_pct": target_pct, "message": msg,
+                }
+            save_state(state_path, state)
+        if target_pct < cur_pct:
+            _run_cmd(["brightnessctl", "-d", "intel_backlight", "set", f"{target_pct}%"])
         _run_cmd([*disp_cmd_prefix, "mode", "single", "--internal-daemon", "--no-notify"])
         if shutil.which("notify-send"):
             _run_cmd(["notify-send", "-a", "Aletheion Thermal Guard", "Thermal Display Shed", msg])
@@ -452,16 +667,21 @@ def execute_transition(
         }
 
     if decision == "RESTORE":
-        saved = state.get("saved_brightness_pct")
-        restore_pct = clamp_safe_brightness_pct(saved if type(saved) is int else 80)
-        state["shed_active"] = False
-        msg = f"Aletheion Thermal Guard: Cooled (TCPU {t_cpu_c}°C / GPU {t_gpu_c}°C) — restored OLED to {restore_pct}% & ScreenPad Plus"
-        if dry_run:
-            return {
-                "executed": False, "dry_run": True, "decision": "RESTORE",
-                "restore_brightness_pct": restore_pct, "message": msg,
-            }
-        save_state(state_path, state)
+        with _guard_state_lock(state_path, enabled=not dry_run):
+            state = load_state(state_path)
+            saved = state.get("saved_brightness_pct")
+            if type(saved) is int and 0 <= saved <= 100:
+                restore_pct = saved
+            else:
+                restore_pct = 80
+            state["shed_active"] = False
+            msg = f"Aletheion Thermal Guard: Cooled (TCPU {t_cpu_c}°C / GPU {t_gpu_c}°C) — restored OLED to {restore_pct}% & ScreenPad Plus"
+            if dry_run:
+                return {
+                    "executed": False, "dry_run": True, "decision": "RESTORE",
+                    "restore_brightness_pct": restore_pct, "message": msg,
+                }
+            save_state(state_path, state)
         _run_cmd(["brightnessctl", "-d", "intel_backlight", "set", f"{restore_pct}%"])
         _run_cmd([*disp_cmd_prefix, "mode", "dual", "--internal-daemon", "--no-notify"])
         if shutil.which("notify-send"):
@@ -475,7 +695,7 @@ def execute_transition(
 
 
 def run_self_test() -> dict[str, Any]:
-    """Deterministic unit-level self-test covering Schmitt trigger, hold timers, override, and brightness floor."""
+    """Deterministic unit-level self-test covering Schmitt trigger, hold timers, override, brightness min, and DPMS wake parser."""
     cfg = HysteresisConfig()
     sm = ThermalDisplayStateMachine(cfg, shed_active=False)
 
@@ -504,6 +724,15 @@ def run_self_test() -> dict[str, Any]:
         HysteresisConfig(shed_brightness_pct=10).validate()
     except GuardDaemonError:
         refused_bad_cfg = True
+    # 8. Never brighten already-dim OLED during shed (including <20% like 5% or 10%!)
+    shed_dim_5 = compute_shed_target_pct(5, 35)
+    shed_dim_20 = compute_shed_target_pct(20, 35)
+    shed_dim_80 = compute_shed_target_pct(80, 35)
+    # 9. Hyprland socket2 DPMS wake parser
+    wake_edp = parse_dpms_wake_event("dpms>>eDP-1,1")
+    wake_pad = parse_dpms_wake_event("dpms>>DP-3,1")
+    wake_off = parse_dpms_wake_event("dpms>>eDP-1,0")
+    wake_other = parse_dpms_wake_event("workspace>>2")
 
     all_ok = (
         r0["decision"] == "NONE" and r1["decision"] == "NONE" and r2["decision"] == "NONE"
@@ -517,10 +746,17 @@ def run_self_test() -> dict[str, Any]:
         and clamp_safe_brightness_pct(15) == MIN_BRIGHTNESS_FLOOR_PCT
         and clamp_safe_brightness_pct(100) == 100
         and refused_bad_cfg
+        and shed_dim_5 == 5
+        and shed_dim_20 == 20
+        and shed_dim_80 == 35
+        and wake_edp == "eDP-1"
+        and wake_pad == "DP-3"
+        and wake_off is None
+        and wake_other is None
     )
 
     payload = {
-        "schema": "aletheion-therm-display-guard-selftest/v1",
+        "schema": "aletheion-therm-display-guard-selftest/v2",
         "all_passed": all_ok,
         "min_brightness_floor_pct": MIN_BRIGHTNESS_FLOOR_PCT,
         "shed_cpu_c": cfg.shed_cpu_c,
@@ -529,7 +765,7 @@ def run_self_test() -> dict[str, Any]:
         "restore_cpu_c": cfg.restore_cpu_c,
         "restore_gpu_c": cfg.restore_gpu_c,
         "restore_hold_s": cfg.restore_hold_s,
-        "checks_verified": 7,
+        "checks_verified": 9,
     }
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     payload["payload_sha256"] = hashlib.sha256(raw).hexdigest()
@@ -537,8 +773,8 @@ def run_self_test() -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Aletheion Hysteretic Thermal-Display Governor")
-    parser.add_argument("--daemon", action="store_true", help="Run continuous polling loop")
+    parser = argparse.ArgumentParser(description="Aletheion Hysteretic Thermal-Display Governor + DPMS Wake Restorer")
+    parser.add_argument("--daemon", action="store_true", help="Run continuous polling loop + DPMS socket2 watcher")
     parser.add_argument("--once", action="store_true", help="Run a single sample & decision")
     parser.add_argument("--dry-run", action="store_true", help="Evaluate live temps without mutating displays")
     parser.add_argument("--self-test", action="store_true", help="Run deterministic state-machine self-test")
@@ -577,26 +813,39 @@ def main(argv: list[str] | None = None) -> int:
             sys.stdout.write(json.dumps(out, indent=2, sort_keys=True) + "\n")
             return 0
 
+        # Launch zero-CPU Hyprland socket2 DPMS wake watcher alongside thermal polling loop.
+        stop_event = threading.Event()
+        watcher = threading.Thread(
+            target=_dpms_wake_watcher_loop,
+            args=(state_path, args.dry_run, stop_event),
+            name="aletheion-dpms-wake",
+            daemon=True,
+        )
+        watcher.start()
+
         # Continuous low-overhead daemon loop
-        while True:
-            t_cpu, t_gpu = read_cpu_gpu_temps()
-            st = load_state(state_path)
-            # Keep shed_active synced if external tool cleared it
-            sm.shed_active = bool(st.get("shed_active", sm.shed_active))
-            dec = sm.step(
-                now_s=int(time.monotonic()),
-                t_cpu_c=t_cpu,
-                t_gpu_c=t_gpu,
-                manual_override=st.get("manual_override"),
-            )
-            if dec["decision"] in ("SHED", "RESTORE"):
-                act = execute_transition(
-                    dec["decision"], t_cpu_c=t_cpu, t_gpu_c=t_gpu, cfg=cfg, state_path=state_path, dry_run=args.dry_run
+        try:
+            while True:
+                t_cpu, t_gpu = read_cpu_gpu_temps()
+                st = load_state(state_path)
+                # Keep shed_active synced if external tool cleared it
+                sm.shed_active = bool(st.get("shed_active", sm.shed_active))
+                dec = sm.step(
+                    now_s=int(time.monotonic()),
+                    t_cpu_c=t_cpu,
+                    t_gpu_c=t_gpu,
+                    manual_override=st.get("manual_override"),
                 )
-                sys.stdout.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                                             "t_cpu_c": t_cpu, "t_gpu_c": t_gpu, "action": act}, sort_keys=True) + "\n")
-                sys.stdout.flush()
-            time.sleep(args.interval)
+                if dec["decision"] in ("SHED", "RESTORE"):
+                    act = execute_transition(
+                        dec["decision"], t_cpu_c=t_cpu, t_gpu_c=t_gpu, cfg=cfg, state_path=state_path, dry_run=args.dry_run
+                    )
+                    sys.stdout.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                                                 "t_cpu_c": t_cpu, "t_gpu_c": t_gpu, "action": act}, sort_keys=True) + "\n")
+                    sys.stdout.flush()
+                time.sleep(args.interval)
+        finally:
+            stop_event.set()
     except GuardDaemonError as exc:
         sys.stderr.write(f"ERROR {exc}\n")
         return 2

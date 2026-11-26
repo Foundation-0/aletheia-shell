@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "aletheia.screen-sleep",
+  "name": "Screen Sleep",
+  "version": "1.0.0",
+  "author": "Aletheia",
+  "license": "MIT",
+  "description": "Zero-burn-in OLED + ScreenPad sleep button (wakes on any activity)",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Screen Sleep",
+    "description": "Left-click: sleep OLED + ScreenPad. Right-click: toggle ScreenPad Plus. Middle-click: open Aletheia Deck.",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

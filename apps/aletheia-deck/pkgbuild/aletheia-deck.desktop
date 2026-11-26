@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Aletheia Deck
+Name[da]=Aletheia Deck
+Comment=Bi-directional ScreenPad Plus interactive swarm and research deck
+Comment[da]=Tovejs interaktivt sværm- og forskningspanel til ScreenPad Plus
+Exec=aletheia-deck
+Icon=aletheia-deck
+Terminal=false
+Categories=Utility;Development;
+StartupWMClass=aletheia-deck
