@@ -1,0 +1,2396 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ALETHEION — Inside the Gigaoptimized Digital Realm</title>
+
+  <!-- Typography: Precision Display Sans + Monumental Serif Accent + Silicon Monospace -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Design Tokens: Silicon Obsidian, Toroid Cyan, Ampere Copper, Epistemic Violet & Verified Emerald -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Space Grotesk"', '"Inter"', 'system-ui', 'sans-serif'],
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          colors: {
+            silicon: {
+              950: '#04060A',
+              900: '#080C14',
+              850: '#0D1320',
+              800: '#131C2E',
+              700: '#1E2A42',
+            },
+            chrome: {
+              50: '#F4F7FC',
+              100: '#E2E9F4',
+              200: '#C0CCE0',
+              400: '#7D8DA8',
+              500: '#56647E',
+            },
+            toroid: {
+              300: '#8CF4FF',
+              400: '#38E8FF',
+              500: '#0FC4E0',
+              900: '#092B36',
+            },
+            ampere: {
+              300: '#FFD099',
+              400: '#FF9E44',
+              500: '#E07B22',
+              900: '#331D0A',
+            },
+            epistemic: {
+              300: '#C4B5FD',
+              400: '#A78BFA',
+              500: '#8B5CF6',
+              900: '#21163D',
+            },
+            verified: {
+              300: '#6EE7B7',
+              400: '#34D399',
+              500: '#10B981',
+              900: '#0A291F',
+            },
+          },
+          keyframes: {
+            pulseSlow: {
+              '0%, 100%': { opacity: '0.45' },
+              '50%': { opacity: '1' },
+            },
+            dashFlow: {
+              '0%': { strokeDashoffset: '48' },
+              '100%': { strokeDashoffset: '0' },
+            },
+            scanline: {
+              '0%': { transform: 'translateY(-100%)' },
+              '100%': { transform: 'translateY(100%)' },
+            },
+          },
+          animation: {
+            'pulse-slow': 'pulseSlow 3.6s ease-in-out infinite',
+            'dash-flow': 'dashFlow 2.2s linear infinite',
+            'scanline': 'scanline 7s linear infinite',
+          },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="bg-silicon-950 text-chrome-100 font-sans antialiased selection:bg-toroid-400/25 selection:text-toroid-300 overflow-x-hidden">
+
+  <!-- ===================================================================== -->
+  <!-- FLOATING CYBERNETIC NAVIGATION INSTRUMENT                             -->
+  <!-- ===================================================================== -->
+  <header class="fixed top-0 inset-x-0 z-50 bg-silicon-950/75 backdrop-blur-xl border-b border-chrome-100/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-18">
+        <!-- Brand Emblem: Toroidal Core + Dual-Screen UX582HS Silhouette -->
+        <a href="#top" class="flex items-center gap-3 group focus:outline-none">
+          <div class="w-9 h-9 rounded-xl bg-silicon-850 border border-toroid-400/25 flex items-center justify-center shadow-lg shadow-toroid-500/10 group-hover:border-toroid-400/60 transition-colors">
+            <svg viewBox="0 0 36 36" class="w-6 h-6" fill="none" aria-hidden="true">
+              <!-- Outer Toroid Ring -->
+              <ellipse cx="18" cy="18" rx="13" ry="7.5" stroke="#38E8FF" stroke-width="1.6" />
+              <ellipse cx="18" cy="18" rx="13" ry="7.5" stroke="#A78BFA" stroke-width="1.2" stroke-dasharray="2 2.5" transform="rotate(60 18 18)" />
+              <ellipse cx="18" cy="18" rx="13" ry="7.5" stroke="#FF9E44" stroke-width="1.2" stroke-opacity="0.75" transform="rotate(-60 18 18)" />
+              <circle cx="18" cy="18" r="2.5" fill="#34D399" />
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-sm font-semibold tracking-[0.22em] text-chrome-50">ALETHEION</span>
+              <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono tracking-wider uppercase bg-toroid-900/80 text-toroid-300 border border-toroid-400/30">
+                SM_86 · UX582HS · R5
+              </span>
+            </div>
+            <span class="text-[11px] text-chrome-400 tracking-wide hidden sm:block">Gigaoptimized Sovereign Compute Realm</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden lg:flex items-center gap-1" aria-label="Primary">
+          <a href="#realm" class="px-3.5 py-2 rounded-lg text-xs font-medium tracking-wider uppercase text-chrome-200 hover:text-toroid-300 hover:bg-chrome-100/5 transition-colors">Realm</a>
+          <a href="#architecture" class="px-3.5 py-2 rounded-lg text-xs font-medium tracking-wider uppercase text-chrome-200 hover:text-toroid-300 hover:bg-chrome-100/5 transition-colors">Topology</a>
+          <a href="#cockpit" class="px-3.5 py-2 rounded-lg text-xs font-medium tracking-wider uppercase text-chrome-200 hover:text-toroid-300 hover:bg-chrome-100/5 transition-colors">Toroid Lab</a>
+          <a href="#playbook" class="px-3.5 py-2 rounded-lg text-xs font-medium tracking-wider uppercase text-chrome-200 hover:text-toroid-300 hover:bg-chrome-100/5 transition-colors">Playbook</a>
+          <a href="#lifecycle" class="px-3.5 py-2 rounded-lg text-xs font-medium tracking-wider uppercase text-chrome-200 hover:text-toroid-300 hover:bg-chrome-100/5 transition-colors">Lifecycle</a>
+          <a href="#atlas" class="px-3.5 py-2 rounded-lg text-xs font-medium tracking-wider uppercase text-chrome-200 hover:text-toroid-300 hover:bg-chrome-100/5 transition-colors">Atlas</a>
+        </nav>
+
+        <!-- Action Buttons & Mobile Trigger -->
+        <div class="flex items-center gap-2">
+          <button id="open-cite-btn" type="button" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono tracking-wider uppercase bg-chrome-100/5 hover:bg-toroid-400/15 text-toroid-300 border border-toroid-400/30 transition-all">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+            </svg>
+            <span class="hidden sm:inline">Manifest &amp; Cite</span>
+            <span class="sm:hidden">Cite</span>
+          </button>
+
+          <button id="mobile-menu-btn" type="button" aria-label="Toggle navigation menu" class="lg:hidden p-2.5 rounded-xl bg-chrome-100/5 border border-chrome-100/10 text-chrome-100 hover:border-toroid-400/40 transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Navigation -->
+    <div id="mobile-menu" class="hidden lg:hidden border-t border-chrome-100/10 bg-silicon-900/95 backdrop-blur-xl px-4 py-4 space-y-1">
+      <a href="#realm" class="mobile-nav-link block px-4 py-3 rounded-xl text-xs font-mono uppercase tracking-widest text-chrome-200 hover:bg-chrome-100/5 hover:text-toroid-300">01 · The Digital Realm</a>
+      <a href="#architecture" class="mobile-nav-link block px-4 py-3 rounded-xl text-xs font-mono uppercase tracking-widest text-chrome-200 hover:bg-chrome-100/5 hover:text-toroid-300">02 · Sovereign Stack Topology</a>
+      <a href="#cockpit" class="mobile-nav-link block px-4 py-3 rounded-xl text-xs font-mono uppercase tracking-widest text-chrome-200 hover:bg-chrome-100/5 hover:text-toroid-300">03 · UX582HS Toroid &amp; SM_86 Lab</a>
+      <a href="#playbook" class="mobile-nav-link block px-4 py-3 rounded-xl text-xs font-mono uppercase tracking-widest text-chrome-200 hover:bg-chrome-100/5 hover:text-toroid-300">04 · Architecture Playbook</a>
+      <a href="#lifecycle" class="mobile-nav-link block px-4 py-3 rounded-xl text-xs font-mono uppercase tracking-widest text-chrome-200 hover:bg-chrome-100/5 hover:text-toroid-300">05 · Sovereign Boot &amp; Migration</a>
+      <a href="#atlas" class="mobile-nav-link block px-4 py-3 rounded-xl text-xs font-mono uppercase tracking-widest text-chrome-200 hover:bg-chrome-100/5 hover:text-toroid-300">06 · Corpus Provenance Atlas</a>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- HERO: INSIDE THE TOROID — INTERACTIVE 3D SILICON MANIFOLD             -->
+  <!-- ===================================================================== -->
+  <section id="top" class="relative min-h-screen flex flex-col justify-between pt-24 pb-10 overflow-hidden border-b border-chrome-100/10">
+    <!-- Interactive Generative 3D Toroid + SM_86 Warp Pulse Canvas -->
+    <div class="absolute inset-0 z-0">
+      <canvas id="hero-toroid-canvas" class="w-full h-full block"></canvas>
+      <!-- Subtle depth vignettes for crisp typography -->
+      <div class="absolute inset-0 bg-gradient-to-b from-silicon-950/75 via-silicon-950/30 to-silicon-950 pointer-events-none"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-silicon-950/90 via-silicon-950/35 to-silicon-950/60 pointer-events-none"></div>
+    </div>
+
+    <!-- Live Machine Telemetry Corner Strip -->
+    <div class="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 flex flex-wrap items-center justify-between gap-3">
+      <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-silicon-900/80 backdrop-blur-md border border-toroid-400/25 text-[11px] font-mono tracking-widest uppercase text-chrome-200">
+        <span class="w-2 h-2 rounded-full bg-verified-400 animate-pulse-slow"></span>
+        <span>Aletheia · Unconcealment in Bare-Metal Silicon</span>
+      </div>
+
+      <div class="hidden md:flex items-center gap-4 px-4 py-1.5 rounded-full bg-silicon-900/75 backdrop-blur-md border border-chrome-100/10 text-[11px] font-mono text-chrome-400">
+        <span class="text-ampere-300">RTX 3080 SM_86</span>
+        <span class="text-chrome-500">/</span>
+        <span class="text-toroid-300">OMARCHY 4.5 + HYPRLAND</span>
+        <span class="text-chrome-500">/</span>
+        <span class="text-verified-400">EPISTEMIC INTEGRITY: LOCKED</span>
+      </div>
+    </div>
+
+    <!-- Hero Monumental Statement -->
+    <div class="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 my-auto py-12 sm:py-16">
+      <div class="max-w-4xl">
+        <p class="font-mono text-xs sm:text-sm tracking-[0.26em] uppercase text-toroid-300/90 mb-5">
+          Gigaoptimized Digital Realm · Bare-Metal Epistemic Computing
+        </p>
+
+        <h1 class="font-display text-5xl sm:text-7xl lg:text-[5.2rem] font-semibold leading-[0.98] tracking-tight text-chrome-50">
+          Step Inside the<br />
+          <span class="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-toroid-300 via-chrome-50 to-ampere-300">
+            Sovereign Silicon Mind.
+          </span>
+        </h1>
+
+        <p class="mt-7 text-base sm:text-lg lg:text-xl text-chrome-200/85 font-light leading-relaxed max-w-2xl">
+          <strong class="font-medium text-chrome-50">ALETHEION</strong> is our vision of a computer transformed into a living, hyper-instrumented epistemic vessel—where Ampere <code class="font-mono text-sm text-ampere-300">SM_86</code> CUDA probes, dual-plane <code class="font-mono text-sm text-toroid-300">UX582HS</code> Wayland geometry, toroidal HUD telemetry, Rosen thermal guards, and R5 integrity proofs co-evolve in real time.
+        </p>
+
+        <!-- Primary Action Row -->
+        <div class="mt-9 flex flex-wrap items-center gap-4">
+          <a href="#cockpit" class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-toroid-400 text-silicon-950 font-semibold text-sm tracking-wide hover:bg-toroid-300 transition-all shadow-xl shadow-toroid-500/20">
+            <span>Enter Live Toroid Cockpit</span>
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </a>
+
+          <a href="#architecture" class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-silicon-900/80 backdrop-blur-md text-chrome-100 border border-chrome-100/20 hover:border-ampere-400/60 hover:text-ampere-300 font-medium text-sm tracking-wide transition-all">
+            <svg class="w-4 h-4 text-ampere-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+            </svg>
+            <span>Inspect Compute Topology</span>
+          </a>
+
+          <span class="hidden sm:inline-flex items-center gap-2 text-xs font-mono text-chrome-400 ml-1">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-toroid-400"></span>
+            Move cursor or touch to tilt the toroidal phase manifold
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Silicon Corpus Metrics Ribbon -->
+    <div class="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-6 border-t border-chrome-100/10">
+        <div class="p-4 rounded-2xl bg-silicon-900/75 backdrop-blur-md border border-chrome-100/10">
+          <div class="text-[11px] font-mono uppercase tracking-widest text-chrome-400">Sovereign Corpus</div>
+          <div class="mt-1 flex items-baseline gap-2">
+            <span class="font-display text-3xl font-semibold text-chrome-50">30</span>
+            <span class="text-xs font-mono text-toroid-300">276.5 KB dense</span>
+          </div>
+          <p class="mt-1 text-xs text-chrome-400">CUDA, Python daemons, Lua, systemd &amp; R5</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-silicon-900/75 backdrop-blur-md border border-chrome-100/10">
+          <div class="text-[11px] font-mono uppercase tracking-widest text-chrome-400">Silicon Telemetry</div>
+          <div class="mt-1 flex items-baseline gap-2">
+            <span class="font-display text-3xl font-semibold text-chrome-50">SM_86</span>
+            <span class="text-xs font-mono text-ampere-300">RTX 3080 Probe</span>
+          </div>
+          <p class="mt-1 text-xs text-chrome-400">17.7 KB bare-metal CUDA kernel</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-silicon-900/75 backdrop-blur-md border border-chrome-100/10">
+          <div class="text-[11px] font-mono uppercase tracking-widest text-chrome-400">Dual-Plane Cockpit</div>
+          <div class="mt-1 flex items-baseline gap-2">
+            <span class="font-display text-3xl font-semibold text-chrome-50">UX582HS</span>
+            <span class="text-xs font-mono text-epistemic-300">Toroid HUD</span>
+          </div>
+          <p class="mt-1 text-xs text-chrome-400">Hyprland + Omarchy 4.5 + ScreenPad Plus</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-silicon-900/75 backdrop-blur-md border border-chrome-100/10">
+          <div class="text-[11px] font-mono uppercase tracking-widest text-chrome-400">Homeostatic Proofs</div>
+          <div class="mt-1 flex items-baseline gap-2">
+            <span class="font-display text-3xl font-semibold text-chrome-50">R5 Guard</span>
+            <span class="text-xs font-mono text-verified-400">71.1 KB Tests</span>
+          </div>
+          <p class="mt-1 text-xs text-chrome-400">Rosen thermal + epistemic verifier</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION I: THE THREE STRATA OF THE GIGAOPTIMIZED DIGITAL REALM        -->
+  <!-- ===================================================================== -->
+  <section id="realm" class="py-20 sm:py-28 relative border-b border-chrome-100/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="grid lg:grid-cols-12 gap-8 items-end mb-14">
+        <div class="lg:col-span-7">
+          <div class="font-mono text-xs uppercase tracking-[0.25em] text-toroid-400 mb-3">I · The Computational Thesis</div>
+          <h2 class="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold text-chrome-50 leading-[1.05]">
+            Not an operating system layered on hardware—<br />
+            <span class="font-serif italic font-normal text-ampere-300">silicon and cognition fused as one circuit.</span>
+          </h2>
+        </div>
+        <div class="lg:col-span-5">
+          <p class="text-sm sm:text-base text-chrome-200/80 leading-relaxed">
+            Conventional computers hide physics behind leaky abstractions: thermal throttling strikes blindly, GPUs sit opaque, and system state rots across migrations. <strong class="text-chrome-50 font-medium">ALETHEION</strong> brings our organization's epistemic capture inside the workstation itself—exposing silicon truth, visual geometry, thermal dynamics, and cryptographic verification as a unified closed loop.
+          </p>
+        </div>
+      </div>
+
+      <!-- Three Pillars Grid -->
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Pillar 01: Bare-Metal Silicon Probe -->
+        <article class="group relative p-7 rounded-3xl bg-silicon-900 border border-chrome-100/10 hover:border-ampere-400/50 transition-all duration-300 flex flex-col justify-between overflow-hidden">
+          <div class="absolute top-0 right-0 w-44 h-44 bg-ampere-400/5 rounded-full blur-3xl -mr-14 -mt-14 group-hover:bg-ampere-400/15 transition-colors"></div>
+          <div>
+            <div class="flex items-center justify-between mb-6">
+              <span class="font-mono text-xs tracking-widest uppercase text-ampere-300">01 · Silicon Truth</span>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-mono bg-ampere-900/80 text-ampere-300 border border-ampere-400/30">CUDA SM_86</span>
+            </div>
+            <h3 class="font-display text-2xl sm:text-3xl font-semibold text-chrome-50 mb-3">Direct Bare-Metal Ampere Probing</h3>
+            <p class="text-sm text-chrome-200/75 leading-relaxed">
+              Rather than trusting coarse driver telemetry, <code class="font-mono text-xs text-ampere-300">rtx3080_sm86_silicon_probe.cu</code> interrogates actual SM_86 warp occupancy, clock stability, memory throughput, and silicon thermal signatures at microsecond resolution.
+            </p>
+          </div>
+          <div class="mt-7 pt-5 border-t border-chrome-100/10 flex items-center justify-between text-xs font-mono text-chrome-400">
+            <span>bench/rtx3080_sm86_silicon_probe.cu</span>
+            <span class="text-ampere-300">17.7 KB</span>
+          </div>
+        </article>
+
+        <!-- Pillar 02: Dual-Plane Wayland & Toroid HUD -->
+        <article class="group relative p-7 rounded-3xl bg-silicon-900 border border-chrome-100/10 hover:border-toroid-400/50 transition-all duration-300 flex flex-col justify-between overflow-hidden">
+          <div class="absolute top-0 right-0 w-44 h-44 bg-toroid-400/5 rounded-full blur-3xl -mr-14 -mt-14 group-hover:bg-toroid-400/15 transition-colors"></div>
+          <div>
+            <div class="flex items-center justify-between mb-6">
+              <span class="font-mono text-xs tracking-widest uppercase text-toroid-300">02 · Spatial Cockpit</span>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-mono bg-toroid-900/80 text-toroid-300 border border-toroid-400/30">Hyprland + Lua</span>
+            </div>
+            <h3 class="font-display text-2xl sm:text-3xl font-semibold text-chrome-50 mb-3">Dual-Display UX582HS &amp; Toroid HUD</h3>
+            <p class="text-sm text-chrome-200/75 leading-relaxed">
+              Engineered for the ZenBook Pro Duo <code class="font-mono text-xs text-toroid-300">UX582HS</code> on Omarchy 4.5. The lower ScreenPad Plus becomes a dedicated living instrument via <code class="font-mono text-xs text-toroid-300">toroid-hud.py</code> and <code class="font-mono text-xs text-toroid-300">aletheion_display.py</code>, projecting real-time machine phase directly beneath your hands.
+            </p>
+          </div>
+          <div class="mt-7 pt-5 border-t border-chrome-100/10 flex items-center justify-between text-xs font-mono text-chrome-400">
+            <span>toroid-hud.py + display.py</span>
+            <span class="text-toroid-300">48.1 KB</span>
+          </div>
+        </article>
+
+        <!-- Pillar 03: Rosen Thermal & Epistemic Immunity -->
+        <article class="group relative p-7 rounded-3xl bg-silicon-900 border border-chrome-100/10 hover:border-verified-400/50 transition-all duration-300 flex flex-col justify-between overflow-hidden">
+          <div class="absolute top-0 right-0 w-44 h-44 bg-verified-400/5 rounded-full blur-3xl -mr-14 -mt-14 group-hover:bg-verified-400/15 transition-colors"></div>
+          <div>
+            <div class="flex items-center justify-between mb-6">
+              <span class="font-mono text-xs tracking-widest uppercase text-verified-300">03 · Homeostatic Immunity</span>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-mono bg-verified-900/80 text-verified-300 border border-verified-400/30">R5 Verified</span>
+            </div>
+            <h3 class="font-display text-2xl sm:text-3xl font-semibold text-chrome-50 mb-3">Rosen Thermal Guards &amp; Epistemic Lock</h3>
+            <p class="text-sm text-chrome-200/75 leading-relaxed">
+              Dual autonomous daemons (<code class="font-mono text-xs text-verified-300">aletheion_thermal_rosen_guard.py</code> and <code class="font-mono text-xs text-verified-300">aletheion_therm_display_guard.py</code>) couple thermal dynamics with OLED luminance, while <code class="font-mono text-xs text-epistemic-300">verify_epistemic_integrity.py</code> and systemd watchdogs guarantee zero silent drift.
+            </p>
+          </div>
+          <div class="mt-7 pt-5 border-t border-chrome-100/10 flex items-center justify-between text-xs font-mono text-chrome-400">
+            <span>Guards + Epistemic + R5</span>
+            <span class="text-verified-300">149.9 KB</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION II: INTERACTIVE SOVEREIGN COMPUTE TOPOLOGY                    -->
+  <!-- ===================================================================== -->
+  <section id="architecture" class="py-20 sm:py-28 bg-silicon-900/50 border-b border-chrome-100/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header + Stratum Filters -->
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+        <div>
+          <div class="font-mono text-xs uppercase tracking-[0.25em] text-ampere-300 mb-3">II · Closed-Loop Machine Circuit</div>
+          <h2 class="font-display text-4xl sm:text-5xl font-semibold text-chrome-50 leading-tight">
+            The Sovereign Compute Topology
+          </h2>
+          <p class="mt-3 text-sm sm:text-base text-chrome-200/75 max-w-2xl">
+            Trace how bare-metal CUDA probes, Wayland compositor configs, thermal-Rosen daemons, systemd watchdogs, and R5 epistemic tests interlock inside <code class="font-mono text-xs text-toroid-300">aletheion-main</code>. Select any node or trigger a live kernel-to-HUD telemetry pulse.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" data-filter="all" class="topo-filter-btn px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-chrome-50 text-silicon-950 font-semibold transition-all">All Layers</button>
+          <button type="button" data-filter="silicon" class="topo-filter-btn px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-silicon-850 text-ampere-300 border border-ampere-400/25 hover:border-ampere-400/60 transition-all">Silicon &amp; Boot</button>
+          <button type="button" data-filter="display" class="topo-filter-btn px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-silicon-850 text-toroid-300 border border-toroid-400/25 hover:border-toroid-400/60 transition-all">Display &amp; HUD</button>
+          <button type="button" data-filter="thermal" class="topo-filter-btn px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-silicon-850 text-verified-300 border border-verified-400/25 hover:border-verified-400/60 transition-all">Thermal Guards</button>
+          <button type="button" data-filter="epistemic" class="topo-filter-btn px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-silicon-850 text-epistemic-300 border border-epistemic-400/25 hover:border-epistemic-400/60 transition-all">Epistemic &amp; R5</button>
+        </div>
+      </div>
+
+      <!-- Topology Grid: Interactive SVG Circuit + Node Inspector -->
+      <div class="grid lg:grid-cols-12 gap-6 items-stretch">
+        <!-- SVG Circuit Diagram -->
+        <div class="lg:col-span-8 rounded-3xl bg-silicon-950 border border-chrome-100/10 p-4 sm:p-6 flex flex-col justify-between relative overflow-hidden">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-chrome-100/10">
+            <div class="flex items-center gap-3 text-[11px] font-mono text-chrome-400">
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-ampere-400"></span>Silicon/Boot</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-toroid-400"></span>Display/HUD</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-verified-400"></span>Guards</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-epistemic-400"></span>Epistemic/R5</span>
+            </div>
+
+            <button id="pulse-topo-btn" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-toroid-900/80 hover:bg-toroid-400/20 text-toroid-300 border border-toroid-400/40 text-xs font-mono tracking-wider uppercase transition-all">
+              <span class="w-2 h-2 rounded-full bg-toroid-400 animate-ping"></span>
+              <span>Fire Silicon-to-HUD Pulse</span>
+            </button>
+          </div>
+
+          <div class="w-full overflow-x-auto">
+            <svg id="topology-svg" viewBox="0 0 840 470" class="w-full min-w-[620px] h-auto select-none" role="img" aria-label="ALETHEION Sovereign Compute Topology">
+              <defs>
+                <filter id="cyber-glow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <linearGradient id="cyber-edge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#FF9E44" stop-opacity="0.75" />
+                  <stop offset="50%" stop-color="#38E8FF" stop-opacity="0.9" />
+                  <stop offset="100%" stop-color="#A78BFA" stop-opacity="0.85" />
+                </linearGradient>
+              </defs>
+
+              <!-- Column Guides -->
+              <g opacity="0.25" font-family="JetBrains Mono, monospace" font-size="9" fill="#7D8DA8" letter-spacing="1.6">
+                <line x1="115" y1="24" x2="115" y2="452" stroke="#C0CCE0" stroke-dasharray="2 5" stroke-width="0.7" />
+                <text x="115" y="15" text-anchor="middle">SILICON &amp; BOOT</text>
+
+                <line x1="325" y1="24" x2="325" y2="452" stroke="#C0CCE0" stroke-dasharray="2 5" stroke-width="0.7" />
+                <text x="325" y="15" text-anchor="middle">CONTROL DAEMONS</text>
+
+                <line x1="545" y1="24" x2="545" y2="452" stroke="#C0CCE0" stroke-dasharray="2 5" stroke-width="0.7" />
+                <text x="545" y="15" text-anchor="middle">COCKPIT &amp; SYSTEMD</text>
+
+                <line x1="740" y1="24" x2="740" y2="452" stroke="#C0CCE0" stroke-dasharray="2 5" stroke-width="0.7" />
+                <text x="740" y="15" text-anchor="middle">EPISTEMIC &amp; R5</text>
+              </g>
+
+              <g id="topo-edges"></g>
+              <g id="topo-pulses"></g>
+              <g id="topo-nodes"></g>
+            </svg>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-chrome-100/10 flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-chrome-400">
+            <span>Bus Status: <strong class="text-toroid-300 font-medium">12 subsystems coupled · zero orphan daemons</strong></span>
+            <span id="topo-stage-readout" class="text-chrome-400">Click any node to inspect bare-metal coupling</span>
+          </div>
+        </div>
+
+        <!-- Inspector Panel -->
+        <aside class="lg:col-span-4 rounded-3xl bg-silicon-950 border border-chrome-100/10 p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <span id="insp-badge" class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest bg-ampere-900/80 text-ampere-300 border border-ampere-400/35">Silicon Probe</span>
+              <span id="insp-size" class="text-xs font-mono text-chrome-400">17.7 KB CUDA</span>
+            </div>
+
+            <h3 id="insp-title" class="font-display text-2xl sm:text-3xl font-semibold text-chrome-50 leading-tight">RTX 3080 SM_86 Probe</h3>
+            <div id="insp-path" class="mt-1.5 font-mono text-xs text-toroid-300 break-all">bench/rtx3080_sm86_silicon_probe.cu</div>
+
+            <p id="insp-desc" class="mt-4 text-sm text-chrome-200/80 leading-relaxed">
+              Direct bare-metal CUDA kernel targeting NVIDIA Ampere SM_86 silicon. Measures real streaming multiprocessor warp residency, cache pressure, and micro-thermal rise without driver smoothing.
+            </p>
+
+            <div class="mt-5 p-4 rounded-2xl bg-silicon-900 border border-chrome-100/10">
+              <div class="text-[10px] font-mono uppercase tracking-widest text-chrome-400 mb-1.5">Runtime Invariant / Contract</div>
+              <div id="insp-invariant" class="font-mono text-xs text-ampere-300 leading-relaxed">
+                nvcc -arch=sm_86 → ΔT_silicon, WarpOccupancy, L2HitRate ∈ [VerifiedBounds]
+              </div>
+            </div>
+
+            <div class="mt-5 grid grid-cols-2 gap-3">
+              <div class="p-3.5 rounded-2xl bg-silicon-900/70 border border-chrome-100/10">
+                <div class="text-[10px] font-mono uppercase tracking-widest text-chrome-400 mb-2">Driven By</div>
+                <div id="insp-inputs" class="flex flex-col gap-1.5 text-xs font-mono text-chrome-200"></div>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-silicon-900/70 border border-chrome-100/10">
+                <div class="text-[10px] font-mono uppercase tracking-widest text-chrome-400 mb-2">Streams Into</div>
+                <div id="insp-outputs" class="flex flex-col gap-1.5 text-xs font-mono text-chrome-200"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-chrome-100/10 flex items-center justify-between text-[11px] font-mono text-chrome-400">
+            <span>Host: UX582HS · Omarchy 4.5</span>
+            <span class="text-verified-400">● R5 Audited</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION III: LIVE DUAL-SCREEN UX582HS COCKPIT & SM_86 SILICON LAB     -->
+  <!-- ===================================================================== -->
+  <section id="cockpit" class="py-20 sm:py-28 border-b border-chrome-100/10 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="grid lg:grid-cols-12 gap-6 items-end mb-10">
+        <div class="lg:col-span-7">
+          <div class="font-mono text-xs uppercase tracking-[0.25em] text-toroid-400 mb-3">III · Inside the Living Machine</div>
+          <h2 class="font-display text-4xl sm:text-5xl font-semibold text-chrome-50 leading-tight">
+            Dual-Plane <span class="font-serif italic font-normal text-toroid-300">UX582HS</span> Cockpit &amp; Toroid HUD
+          </h2>
+        </div>
+        <div class="lg:col-span-5">
+          <p class="text-sm text-chrome-200/80 leading-relaxed">
+            Experience both displays of the gigaoptimized workstation simultaneously: the primary 4K plane exposing live <code class="font-mono text-xs text-ampere-300">SM_86</code> silicon warp tiles &amp; Rosen thermal contours, coupled with the lower ScreenPad Plus running <code class="font-mono text-xs text-toroid-300">toroid-hud.py</code>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Workload Scenario Presets -->
+      <div class="flex flex-wrap items-center gap-2.5 mb-6">
+        <span class="text-xs font-mono uppercase tracking-widest text-chrome-400 mr-1">Compute Regimes:</span>
+        <button type="button" data-regime="zen" class="regime-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-toroid-900/80 text-toroid-300 border border-toroid-400/45 transition-all">Omarchy Zen (Nominal)</button>
+        <button type="button" data-regime="cuda" class="regime-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-silicon-900 text-chrome-200 border border-chrome-100/15 hover:border-ampere-400/60 transition-all">SM_86 Tensor Peak</button>
+        <button type="button" data-regime="rosen" class="regime-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-silicon-900 text-chrome-200 border border-chrome-100/15 hover:border-rose-400/60 transition-all">Thermal Rosen Edge</button>
+        <button type="button" data-regime="freeze" class="regime-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-silicon-900 text-chrome-200 border border-chrome-100/15 hover:border-epistemic-400/60 transition-all">Migration Freeze State</button>
+      </div>
+
+      <!-- Cockpit Workspace -->
+      <div class="grid lg:grid-cols-12 gap-6 items-stretch">
+        <!-- Left 7 Cols: Simulated ZenBook Pro Duo Dual-Display Hardware Stack -->
+        <div class="lg:col-span-7 rounded-3xl bg-silicon-900 border border-chrome-100/10 p-4 sm:p-5 flex flex-col gap-4">
+          <!-- Guard Status Header -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-chrome-100/10">
+            <div class="flex items-center gap-2.5">
+              <span id="cockpit-status-dot" class="w-2.5 h-2.5 rounded-full bg-verified-400"></span>
+              <span id="cockpit-status-badge" class="font-mono text-xs font-semibold uppercase tracking-widest text-verified-400">ROSEN &amp; DISPLAY GUARD: HOMEOSTATIC</span>
+            </div>
+            <span class="font-mono text-[11px] text-chrome-400">eDP-1 (3840×2160) + eDP-2 (3840×1100 ScreenPad+)</span>
+          </div>
+
+          <!-- PRIMARY DISPLAY (eDP-1): SM_86 Die Heatmap & Hyprland Telemetry -->
+          <div class="relative rounded-2xl bg-silicon-950 border border-chrome-100/15 overflow-hidden">
+            <div class="flex items-center justify-between px-3.5 py-2 bg-silicon-900/90 border-b border-chrome-100/10 text-[10px] font-mono text-chrome-400">
+              <span class="text-chrome-200">eDP-1 · HYPRLAND WORKSPACE [1] · rtx3080_sm86_silicon_probe.cu</span>
+              <span id="edp1-refresh" class="text-toroid-300">60 Hz · 320 nits</span>
+            </div>
+            <div class="relative w-full h-[225px] sm:h-[260px]">
+              <canvas id="sm86-die-canvas" class="w-full h-full block"></canvas>
+            </div>
+          </div>
+
+          <!-- Hinge Divider -->
+          <div class="flex items-center gap-3 px-2">
+            <div class="h-px flex-1 bg-gradient-to-r from-transparent via-chrome-100/20 to-transparent"></div>
+            <span class="font-mono text-[9px] uppercase tracking-[0.3em] text-chrome-500">AAS Plus Tilted Thermal Hinge · UX582HS</span>
+            <div class="h-px flex-1 bg-gradient-to-r from-transparent via-chrome-100/20 to-transparent"></div>
+          </div>
+
+          <!-- SECONDARY DISPLAY (eDP-2): ScreenPad Plus Toroid HUD Mirror -->
+          <div class="relative rounded-2xl bg-silicon-950 border border-toroid-400/25 overflow-hidden shadow-inner shadow-toroid-500/10">
+            <div class="flex items-center justify-between px-3.5 py-1.5 bg-toroid-900/35 border-b border-toroid-400/20 text-[10px] font-mono">
+              <span class="text-toroid-300">eDP-2 · SCREENPAD PLUS · toroid-hud.py</span>
+              <span id="edp2-guard-state" class="text-verified-400">LUMINANCE: FULL · WATCHDOG: ARMED</span>
+            </div>
+            <div class="relative w-full h-[125px] sm:h-[145px]">
+              <canvas id="screenpad-toroid-canvas" class="w-full h-full block"></canvas>
+            </div>
+          </div>
+
+          <!-- Daemon Log Line -->
+          <div class="p-3.5 rounded-2xl bg-silicon-950 border border-chrome-100/10 flex items-start gap-3">
+            <span class="mt-0.5 px-2 py-0.5 rounded-md bg-epistemic-900/90 text-epistemic-300 font-mono text-[10px] uppercase tracking-wider shrink-0">watchdog</span>
+            <p id="cockpit-log-line" class="font-mono text-xs text-chrome-200/90 leading-relaxed">
+              [aletheia-toroid-watchdog] SM_86 junction nominal, Rosen thermal envelope strictly inside contraction cone; ScreenPad Plus Toroid HUD locked at 60 FPS.
+            </p>
+          </div>
+        </div>
+
+        <!-- Right 5 Cols: Real-Time Sliders & Bare-Metal Telemetry Readouts -->
+        <div class="lg:col-span-5 rounded-3xl bg-silicon-900 border border-chrome-100/10 p-6 flex flex-col justify-between gap-6">
+          <div class="space-y-5">
+            <div class="text-xs font-mono uppercase tracking-widest text-chrome-400">Live Hardware &amp; Daemon Perturbations</div>
+
+            <!-- Slider 1: SM_86 Warp Load -->
+            <div>
+              <div class="flex items-center justify-between text-xs mb-2">
+                <label for="sl-cuda" class="font-medium text-chrome-100">SM_86 CUDA Warp Load <span class="font-mono text-ampere-300">(probe.cu)</span></label>
+                <span id="read-cuda" class="font-mono text-ampere-300">38 %</span>
+              </div>
+              <input id="sl-cuda" type="range" min="5" max="100" value="38" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-silicon-700 accent-ampere-400" />
+            </div>
+
+            <!-- Slider 2: Thermal Load / Ambient -->
+            <div>
+              <div class="flex items-center justify-between text-xs mb-2">
+                <label for="sl-ambient" class="font-medium text-chrome-100">Thermal Flux Pressure <span class="font-mono text-rose-300">(rosen_guard)</span></label>
+                <span id="read-ambient" class="font-mono text-rose-300">26 °C</span>
+              </div>
+              <input id="sl-ambient" type="range" min="15" max="55" value="26" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-silicon-700 accent-rose-400" />
+            </div>
+
+            <!-- Slider 3: OLED Luminance -->
+            <div>
+              <div class="flex items-center justify-between text-xs mb-2">
+                <label for="sl-nits" class="font-medium text-chrome-100">Dual-OLED Luminance <span class="font-mono text-toroid-300">(display_guard)</span></label>
+                <span id="read-nits" class="font-mono text-toroid-300">320 nits</span>
+              </div>
+              <input id="sl-nits" type="range" min="60" max="500" value="320" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-silicon-700 accent-toroid-400" />
+            </div>
+
+            <!-- Slider 4: Rosen Guard Sensitivity -->
+            <div>
+              <div class="flex items-center justify-between text-xs mb-2">
+                <label for="sl-guard" class="font-medium text-chrome-100">Rosen Guard Damping <span class="font-mono text-verified-300">(gain κ)</span></label>
+                <span id="read-guard" class="font-mono text-verified-300">0.72 κ</span>
+              </div>
+              <input id="sl-guard" type="range" min="15" max="100" value="72" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-silicon-700 accent-verified-400" />
+            </div>
+          </div>
+
+          <!-- 4 Precision Telemetry Cards -->
+          <div class="grid grid-cols-2 gap-3 pt-4 border-t border-chrome-100/10">
+            <div class="p-3.5 rounded-2xl bg-silicon-950 border border-chrome-100/10">
+              <div class="text-[10px] font-mono uppercase tracking-wider text-chrome-400">SM_86 Junction T_j</div>
+              <div id="tel-temp" class="mt-1 font-mono text-lg text-ampere-300">58.4 °C</div>
+              <div class="text-[10px] font-mono text-chrome-500 mt-0.5">68 SMs · 1,710 MHz</div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-silicon-950 border border-chrome-100/10">
+              <div class="text-[10px] font-mono uppercase tracking-wider text-chrome-400">Rosen Margin V(x)</div>
+              <div id="tel-rosen" class="mt-1 font-mono text-lg text-verified-400">+24.6 K</div>
+              <div class="text-[10px] font-mono text-chrome-500 mt-0.5">thermal_rosen_guard</div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-silicon-950 border border-chrome-100/10">
+              <div class="text-[10px] font-mono uppercase tracking-wider text-chrome-400">Display Power Clamp</div>
+              <div id="tel-clamp" class="mt-1 font-mono text-lg text-toroid-300">0% (Full)</div>
+              <div class="text-[10px] font-mono text-chrome-500 mt-0.5">therm_display_guard</div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-silicon-950 border border-chrome-100/10">
+              <div class="text-[10px] font-mono uppercase tracking-wider text-chrome-400">Epistemic Hash</div>
+              <div id="tel-hash" class="mt-1 font-mono text-lg text-epistemic-300">R5 PASS</div>
+              <div class="text-[10px] font-mono text-chrome-500 mt-0.5">verify_epistemic.py</div>
+            </div>
+          </div>
+
+          <!-- Homeostasis Auto-Converge Trigger -->
+          <button id="engage-rosen-btn" type="button" class="w-full py-3 px-4 rounded-2xl bg-chrome-100/5 hover:bg-verified-400/15 border border-verified-400/40 text-verified-300 font-mono text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span>Engage Autonomous Rosen Homeostasis</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION IV: THE ARCHITECTURE PLAYBOOK (5-Movement Technical Thesis)   -->
+  <!-- ===================================================================== -->
+  <section id="playbook" class="py-20 sm:py-28 bg-silicon-900/40 border-b border-chrome-100/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mb-12">
+        <div class="font-mono text-xs uppercase tracking-[0.25em] text-epistemic-300 mb-3">IV · The Machine Monograph</div>
+        <h2 class="font-display text-4xl sm:text-5xl font-semibold text-chrome-50 leading-tight">
+          Five Movements of the <span class="font-serif italic font-normal text-toroid-300">Aletheion Stack</span>
+        </h2>
+        <p class="mt-3 text-sm sm:text-base text-chrome-200/75 leading-relaxed">
+          Synthesized directly from <code class="font-mono text-xs text-toroid-300">README.md</code>, <code class="font-mono text-xs text-toroid-300">ZENBOOK_PRO_DUO_PLAYBOOK.md</code>, <code class="font-mono text-xs text-toroid-300">ALETHEION_DISPLAY_THERMAL_GUARD.md</code>, bare-metal CUDA probes, and our R5 verification suite.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-12 gap-8 items-start">
+        <!-- Chapter Rail -->
+        <aside class="lg:col-span-3 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 lg:sticky lg:top-24">
+          <button type="button" data-ch="0" class="pb-tab-btn shrink-0 text-left px-4 py-3.5 rounded-2xl border transition-all bg-silicon-850 border-toroid-400/55 text-chrome-50">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-toroid-300">Movement I · README.md</div>
+            <div class="font-display text-lg font-medium mt-0.5">Aletheia in Silicon</div>
+          </button>
+
+          <button type="button" data-ch="1" class="pb-tab-btn shrink-0 text-left px-4 py-3.5 rounded-2xl border transition-all bg-silicon-950/60 border-chrome-100/10 text-chrome-400 hover:text-chrome-100">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-ampere-300">Movement II · bench/</div>
+            <div class="font-display text-lg font-medium mt-0.5">SM_86 Bare-Metal Probe</div>
+          </button>
+
+          <button type="button" data-ch="2" class="pb-tab-btn shrink-0 text-left px-4 py-3.5 rounded-2xl border transition-all bg-silicon-950/60 border-chrome-100/10 text-chrome-400 hover:text-chrome-100">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-toroid-300">Movement III · Playbook</div>
+            <div class="font-display text-lg font-medium mt-0.5">Dual-Screen Toroid HUD</div>
+          </button>
+
+          <button type="button" data-ch="3" class="pb-tab-btn shrink-0 text-left px-4 py-3.5 rounded-2xl border transition-all bg-silicon-950/60 border-chrome-100/10 text-chrome-400 hover:text-chrome-100">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-verified-300">Movement IV · Guards</div>
+            <div class="font-display text-lg font-medium mt-0.5">Rosen &amp; Display Control</div>
+          </button>
+
+          <button type="button" data-ch="4" class="pb-tab-btn shrink-0 text-left px-4 py-3.5 rounded-2xl border transition-all bg-silicon-950/60 border-chrome-100/10 text-chrome-400 hover:text-chrome-100">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-epistemic-300">Movement V · R5 Proofs</div>
+            <div class="font-display text-lg font-medium mt-0.5">Epistemic Integrity</div>
+          </button>
+        </aside>
+
+        <!-- Main Manuscript Pane -->
+        <article class="lg:col-span-6 rounded-3xl bg-silicon-950 border border-chrome-100/10 p-6 sm:p-10 shadow-2xl">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-5 mb-6 border-b border-chrome-100/10">
+            <span id="pb-source" class="font-mono text-xs text-toroid-300">README.md · 5,690 bytes</span>
+            <span id="pb-index" class="font-mono text-[11px] uppercase tracking-widest text-chrome-400">Movement 01 / 05</span>
+          </div>
+
+          <h3 id="pb-title" class="font-display text-3xl sm:text-4xl font-semibold text-chrome-50 leading-tight mb-5">
+            Aletheia in Silicon: The Unconcealed Workstation
+          </h3>
+
+          <div id="pb-body" class="space-y-5 text-sm sm:text-base text-chrome-200/85 leading-relaxed font-light"></div>
+
+          <div class="mt-7 p-5 rounded-2xl bg-silicon-900 border-l-2 border-toroid-400">
+            <div id="pb-axiom-label" class="font-mono text-[10px] uppercase tracking-widest text-toroid-300 mb-2">Governing Systems Law</div>
+            <div id="pb-axiom" class="font-mono text-xs sm:text-sm text-chrome-100 leading-relaxed"></div>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-chrome-100/10 flex items-center justify-between gap-4">
+            <button id="pb-prev-btn" type="button" class="px-4 py-2.5 rounded-xl bg-silicon-900 border border-chrome-100/15 hover:border-chrome-100/35 text-xs font-mono uppercase tracking-wider text-chrome-200 transition-colors">&larr; Previous</button>
+            <button id="pb-next-btn" type="button" class="px-4 py-2.5 rounded-xl bg-toroid-400 text-silicon-950 hover:bg-toroid-300 text-xs font-mono font-semibold uppercase tracking-wider transition-colors">Next Movement &rarr;</button>
+          </div>
+        </article>
+
+        <!-- Marginalia & Coupled Code Files -->
+        <aside class="lg:col-span-3 space-y-4 lg:sticky lg:top-24">
+          <div class="p-5 rounded-3xl bg-silicon-950 border border-chrome-100/10">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-ampere-300 mb-2">Design Philosophy</div>
+            <p id="pb-marginalia" class="font-serif italic text-base text-chrome-200/85 leading-relaxed"></p>
+          </div>
+
+          <div class="p-5 rounded-3xl bg-silicon-950 border border-chrome-100/10">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-toroid-300 mb-3">Coupled Source Files</div>
+            <ul id="pb-artifacts" class="space-y-2 font-mono text-xs text-chrome-200"></ul>
+          </div>
+
+          <div class="p-5 rounded-3xl bg-gradient-to-br from-silicon-900 to-silicon-950 border border-verified-400/25">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-verified-400 mb-1.5">Verification Anchor</div>
+            <p id="pb-status" class="text-xs text-chrome-200/80 leading-relaxed"></p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION V: SOVEREIGN LIFECYCLE CHOREOGRAPHY (bin/*.sh Pipeline)       -->
+  <!-- ===================================================================== -->
+  <section id="lifecycle" class="py-20 sm:py-28 border-b border-chrome-100/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mb-12">
+        <div class="font-mono text-xs uppercase tracking-[0.25em] text-verified-400 mb-3">V · Zero-Decay Machine Continuity</div>
+        <h2 class="font-display text-4xl sm:text-5xl font-semibold text-chrome-50 leading-tight">
+          Sovereign Lifecycle <span class="font-serif italic font-normal text-ampere-300">Choreography</span>
+        </h2>
+        <p class="mt-3 text-sm sm:text-base text-chrome-200/75 leading-relaxed">
+          A gigaoptimized digital realm must never be fragile or irreproducible. Five deterministic shell protocols govern the machine's entire life—from bare boot-drive synthesis to cryptographic migration freeze and verified resurrection. Select a phase to inspect its execution contract.
+        </p>
+      </div>
+
+      <!-- Interactive 5-Stage Pipeline Selector -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+        <button type="button" data-stage="0" class="lc-stage-btn text-left p-4 rounded-2xl bg-silicon-850 border border-toroid-400/55 transition-all">
+          <div class="font-mono text-[10px] text-toroid-300 uppercase tracking-widest">Phase 01 · 7.1 KB</div>
+          <div class="font-display text-base font-semibold text-chrome-50 mt-1">prep-boot-drive.sh</div>
+          <div class="text-xs text-chrome-400 mt-1">Media Genesis</div>
+        </button>
+
+        <button type="button" data-stage="1" class="lc-stage-btn text-left p-4 rounded-2xl bg-silicon-900 border border-chrome-100/10 hover:border-chrome-100/30 transition-all">
+          <div class="font-mono text-[10px] text-ampere-300 uppercase tracking-widest">Phase 02 · 4.4 KB</div>
+          <div class="font-display text-base font-semibold text-chrome-50 mt-1">bootstrap-zenbook.sh</div>
+          <div class="text-xs text-chrome-400 mt-1">UX582HS Ignition</div>
+        </button>
+
+        <button type="button" data-stage="2" class="lc-stage-btn text-left p-4 rounded-2xl bg-silicon-900 border border-chrome-100/10 hover:border-chrome-100/30 transition-all">
+          <div class="font-mono text-[10px] text-toroid-300 uppercase tracking-widest">Phase 03 · 8.0 KB</div>
+          <div class="font-display text-base font-semibold text-chrome-50 mt-1">launch-screenpad-hud.sh</div>
+          <div class="text-xs text-chrome-400 mt-1">Toroid Awakening</div>
+        </button>
+
+        <button type="button" data-stage="3" class="lc-stage-btn text-left p-4 rounded-2xl bg-silicon-900 border border-chrome-100/10 hover:border-chrome-100/30 transition-all">
+          <div class="font-mono text-[10px] text-epistemic-300 uppercase tracking-widest">Phase 04 · 7.2 KB</div>
+          <div class="font-display text-base font-semibold text-chrome-50 mt-1">freeze-for-migration.sh</div>
+          <div class="text-xs text-chrome-400 mt-1">Atomic Snapshot</div>
+        </button>
+
+        <button type="button" data-stage="4" class="lc-stage-btn text-left p-4 rounded-2xl bg-silicon-900 border border-chrome-100/10 hover:border-chrome-100/30 transition-all">
+          <div class="font-mono text-[10px] text-verified-300 uppercase tracking-widest">Phase 05 · 4.8 KB</div>
+          <div class="font-display text-base font-semibold text-chrome-50 mt-1">restore-and-verify.sh</div>
+          <div class="text-xs text-chrome-400 mt-1">Epistemic Rebirth</div>
+        </button>
+      </div>
+
+      <!-- Simulated Sovereign Terminal Window -->
+      <div class="rounded-3xl bg-silicon-950 border border-chrome-100/15 overflow-hidden shadow-2xl">
+        <div class="px-5 py-3 bg-silicon-900 border-b border-chrome-100/10 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-400/70"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-ampere-400/70"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-verified-400/70"></span>
+            <span id="lc-term-title" class="ml-2 font-mono text-xs text-chrome-300">aletheion@ux582hs:~/aletheion-main/bin$ ./prep-boot-drive.sh</span>
+          </div>
+          <span id="lc-term-badge" class="font-mono text-[10px] uppercase tracking-widest text-verified-400">DETERMINISTIC · IDEMPOTENT</span>
+        </div>
+
+        <div class="grid lg:grid-cols-12">
+          <div class="lg:col-span-7 p-6 font-mono text-xs leading-relaxed text-chrome-200 border-b lg:border-b-0 lg:border-r border-chrome-100/10">
+            <pre id="lc-term-output" class="whitespace-pre-wrap"></pre>
+          </div>
+          <div class="lg:col-span-5 p-6 flex flex-col justify-between bg-silicon-900/40">
+            <div>
+              <div class="font-mono text-[10px] uppercase tracking-widest text-toroid-300 mb-2">Stage Purpose &amp; Invariants</div>
+              <p id="lc-stage-desc" class="text-sm text-chrome-200/85 leading-relaxed mb-5"></p>
+              <ul id="lc-stage-checks" class="space-y-2 font-mono text-xs text-verified-300"></ul>
+            </div>
+            <div class="mt-6 pt-4 border-t border-chrome-100/10 flex items-center justify-between text-[11px] font-mono text-chrome-400">
+              <span>Verified by test_aletheia_shell_r5.py</span>
+              <span class="text-epistemic-300">48.3 KB Shell R5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION VI: COMPLETE ALETHEION-MAIN CORPUS ATLAS (30 Entries)         -->
+  <!-- ===================================================================== -->
+  <section id="atlas" class="py-20 sm:py-28 bg-silicon-900/40 border-b border-chrome-100/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+        <div>
+          <div class="font-mono text-xs uppercase tracking-[0.25em] text-toroid-300 mb-3">VI · Silicon Provenance Atlas</div>
+          <h2 class="font-display text-4xl sm:text-5xl font-semibold text-chrome-50 leading-tight">
+            The <span class="font-mono text-3xl sm:text-4xl text-toroid-300">aletheion-main</span> Corpus
+          </h2>
+          <p class="mt-3 text-sm sm:text-base text-chrome-200/75 max-w-2xl">
+            Every visual claim maps directly to verifiable source code across 30 tracked entries (276,481 bytes)—spanning CUDA silicon probes, Python guards, Wayland/Omarchy configs, systemd units, and R5 test suites.
+          </p>
+        </div>
+
+        <div class="w-full lg:w-80">
+          <label for="atlas-search" class="sr-only">Filter artifacts</label>
+          <div class="relative">
+            <input id="atlas-search" type="text" placeholder="Filter CUDA, guard, systemd, R5..." class="w-full pl-10 pr-4 py-3 rounded-2xl bg-silicon-950 border border-chrome-100/15 focus:border-toroid-400/60 focus:outline-none text-xs font-mono text-chrome-100 placeholder:text-chrome-500" />
+            <svg class="w-4 h-4 text-chrome-400 absolute left-3.5 top-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain Filter Buttons -->
+      <div class="flex flex-wrap gap-2 mb-7">
+        <button type="button" data-domain="all" class="atlas-domain-btn px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-chrome-50 text-silicon-950 font-semibold transition-all">All Modules</button>
+        <button type="button" data-domain="bench" class="atlas-domain-btn px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-silicon-950 text-ampere-300 border border-ampere-400/25 hover:border-ampere-400/60 transition-all">CUDA Bench</button>
+        <button type="button" data-domain="daemons" class="atlas-domain-btn px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-silicon-950 text-toroid-300 border border-toroid-400/25 hover:border-toroid-400/60 transition-all">Guards &amp; HUD</button>
+        <button type="button" data-domain="shell" class="atlas-domain-btn px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-silicon-950 text-chrome-200 border border-chrome-100/15 hover:border-chrome-100/40 transition-all">Lifecycle Shell</button>
+        <button type="button" data-domain="configs" class="atlas-domain-btn px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-silicon-950 text-verified-300 border border-verified-400/25 hover:border-verified-400/60 transition-all">Configs &amp; Systemd</button>
+        <button type="button" data-domain="tests" class="atlas-domain-btn px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider bg-silicon-950 text-epistemic-300 border border-epistemic-400/25 hover:border-epistemic-400/60 transition-all">Epistemic &amp; R5</button>
+      </div>
+
+      <div id="atlas-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="atlas-empty" class="hidden text-center py-12 rounded-3xl bg-silicon-950 border border-chrome-100/10 font-mono text-sm text-chrome-400">
+        No corpus modules match your search filter.
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- FOOTER & COLOPHON                                                     -->
+  <!-- ===================================================================== -->
+  <footer class="py-14 bg-silicon-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-12 gap-8 pb-10 border-b border-chrome-100/10">
+        <div class="md:col-span-6">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="font-mono text-base font-semibold tracking-[0.24em] text-chrome-50">ALETHEION</span>
+            <span class="text-xs font-mono text-chrome-500">·</span>
+            <span class="text-xs font-mono text-toroid-300">Gigaoptimized Sovereign Compute Realm</span>
+          </div>
+          <p class="text-sm text-chrome-400 leading-relaxed max-w-lg">
+            The digital sibling to our physical convergence vision—bringing bare-metal CUDA silicon probing, dual-screen toroidal ergonomics, coupled thermal-Rosen homeostasis, and R5 epistemic verification into one living machine.
+          </p>
+        </div>
+
+        <div class="md:col-span-3">
+          <div class="font-mono text-[11px] uppercase tracking-widest text-chrome-400 mb-3">Hardware &amp; Compositor</div>
+          <ul class="space-y-2 text-xs font-mono text-chrome-200/80">
+            <li>NVIDIA RTX 3080 (Ampere SM_86)</li>
+            <li>ASUS ZenBook Pro Duo UX582HS</li>
+            <li>Hyprland + Omarchy 4.5 Monitors</li>
+            <li>ScreenPad Plus Toroid HUD</li>
+          </ul>
+        </div>
+
+        <div class="md:col-span-3">
+          <div class="font-mono text-[11px] uppercase tracking-widest text-chrome-400 mb-3">Verification &amp; Guards</div>
+          <ul class="space-y-2 text-xs font-mono text-chrome-200/80">
+            <li>aletheion_thermal_rosen_guard.py</li>
+            <li>aletheion_therm_display_guard.py</li>
+            <li>verify_epistemic_integrity.py</li>
+            <li>tests/test_aletheia_shell_r5.py</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-chrome-500">
+        <div>Corpus Manifest: aletheion-main · 30 entries · 276,481 bytes · Licensed (LICENSE)</div>
+        <div class="flex items-center gap-4">
+          <button id="footer-cite-btn" type="button" class="text-toroid-300 hover:text-toroid-400 transition-colors">Copy Machine Manifest</button>
+          <a href="#top" class="text-chrome-400 hover:text-chrome-100 transition-colors">Return to Toroid Apex &uarr;</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: MANIFEST & CITATION EXPORT                                     -->
+  <!-- ===================================================================== -->
+  <div id="cite-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-silicon-950/85 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="cite-modal-title">
+    <div class="w-full max-w-2xl rounded-3xl bg-silicon-900 border border-chrome-100/15 shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-5 border-b border-chrome-100/10">
+        <div>
+          <div class="font-mono text-[10px] uppercase tracking-widest text-toroid-300">Digital Realm Provenance</div>
+          <h3 id="cite-modal-title" class="font-display text-2xl font-semibold text-chrome-50 mt-0.5">Cite &amp; Reference ALETHEION</h3>
+        </div>
+        <button id="close-cite-btn" type="button" aria-label="Close modal" class="p-2 rounded-xl bg-silicon-850 border border-chrome-100/10 text-chrome-300 hover:text-chrome-50">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-6">
+        <div class="flex flex-wrap gap-2 mb-4">
+          <button type="button" data-cite-tab="bibtex" class="cite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-mono bg-chrome-50 text-silicon-950 font-semibold">BibTeX</button>
+          <button type="button" data-cite-tab="summary" class="cite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-mono bg-silicon-850 text-chrome-300 border border-chrome-100/10">Architecture Brief</button>
+          <button type="button" data-cite-tab="manifest" class="cite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-mono bg-silicon-850 text-chrome-300 border border-chrome-100/10">Corpus JSON</button>
+        </div>
+
+        <pre id="cite-output" class="p-4 rounded-2xl bg-silicon-950 border border-chrome-100/10 font-mono text-xs text-toroid-300 overflow-x-auto leading-relaxed whitespace-pre-wrap"></pre>
+
+        <div class="mt-5 flex items-center justify-end gap-3">
+          <button id="copy-cite-btn" type="button" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-toroid-400 hover:bg-toroid-300 text-silicon-950 font-mono text-xs font-semibold uppercase tracking-wider transition-colors">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span>Copy to Clipboard</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- NON-INTRUSIVE TOAST NOTIFICATION                                      -->
+  <!-- ===================================================================== -->
+  <div id="toast-banner" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-3 transition-all duration-300">
+    <div class="px-4 py-3 rounded-2xl bg-silicon-900/95 backdrop-blur-md border border-toroid-400/45 shadow-2xl flex items-center gap-2.5">
+      <span class="w-2 h-2 rounded-full bg-verified-400"></span>
+      <span id="toast-text" class="font-mono text-xs text-chrome-100">Copied to clipboard</span>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- INTERACTIVE SILICON, TOROIDAL & EPISTEMIC ENGINE                      -->
+  <!-- ===================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ------------------------------------------------------------------- */
+      /* UTILITY: TOAST NOTIFICATION & IFRAME-SAFE CLIPBOARD                 */
+      /* ------------------------------------------------------------------- */
+      let toastTimer = null;
+      function showToast(msg) {
+        const banner = document.getElementById('toast-banner');
+        const text = document.getElementById('toast-text');
+        if (!banner || !text) return;
+        text.textContent = msg;
+        banner.classList.remove('opacity-0', 'translate-y-3');
+        banner.classList.add('opacity-100', 'translate-y-0');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          banner.classList.add('opacity-0', 'translate-y-3');
+          banner.classList.remove('opacity-100', 'translate-y-0');
+        }, 2800);
+      }
+
+      function copyTextSafe(str) {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = str;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast('Copied ALETHEION artifact reference to clipboard');
+        } catch (err) {
+          showToast('Please select and copy manually');
+        }
+      }
+
+      /* ------------------------------------------------------------------- */
+      /* MOBILE MENU TOGGLE                                                  */
+      /* ------------------------------------------------------------------- */
+      const mobileBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      if (mobileBtn && mobileMenu) {
+        mobileBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+        document.querySelectorAll('.mobile-nav-link').forEach((link) => {
+          link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+      }
+
+      /* ------------------------------------------------------------------- */
+      /* 1. HERO CANVAS: 3D-PROJECTED TOROIDAL SILICON MANIFOLD              */
+      /* ------------------------------------------------------------------- */
+      function initHeroToroidCanvas() {
+        const canvas = document.getElementById('hero-toroid-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        let width = 0;
+        let height = 0;
+        let dpr = 1;
+        let isVisible = true;
+        let t = 0;
+
+        const pointer = { x: 0.65, y: 0.45, tx: 0.65, ty: 0.45 };
+
+        // Live warp-packets racing around toroidal meridians and parallels
+        const packets = Array.from({ length: 24 }, (_, i) => ({
+          u: Math.random() * Math.PI * 2,
+          v: Math.random() * Math.PI * 2,
+          du: (i % 2 === 0 ? 0.014 : 0.004) + Math.random() * 0.009,
+          dv: (i % 2 === 1 ? 0.022 : 0.007) + Math.random() * 0.012,
+          kind: i % 3, // 0: toroid cyan, 1: ampere copper, 2: epistemic violet
+        }));
+
+        function resize() {
+          const rect = canvas.parentElement.getBoundingClientRect();
+          dpr = Math.min(window.devicePixelRatio || 1, 2);
+          width = Math.max(320, rect.width);
+          height = Math.max(480, rect.height);
+          canvas.width = Math.floor(width * dpr);
+          canvas.height = Math.floor(height * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        function setPtr(cx, cy) {
+          const rect = canvas.getBoundingClientRect();
+          pointer.tx = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+          pointer.ty = Math.max(0, Math.min(1, (cy - rect.top) / rect.height));
+        }
+
+        window.addEventListener('mousemove', (e) => setPtr(e.clientX, e.clientY), { passive: true });
+        canvas.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches[0]) setPtr(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+
+        if ('IntersectionObserver' in window) {
+          const obs = new IntersectionObserver((entries) => {
+            isVisible = entries[0] ? entries[0].isIntersecting : true;
+          }, { threshold: 0.05 });
+          obs.observe(canvas);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        function projectTorus(u, v, time) {
+          const cx = width * (width < 768 ? 0.52 : 0.67);
+          const cy = height * 0.52;
+          const scale = Math.min(width * 0.25, height * 0.34, 240);
+
+          const R = 1.12;
+          const r = 0.44 + Math.sin(u * 3 + time * 1.1) * 0.025;
+
+          const x0 = (R + r * Math.cos(v)) * Math.cos(u);
+          const y0 = (R + r * Math.cos(v)) * Math.sin(u);
+          const z0 = r * Math.sin(v);
+
+          // Rotate smoothly with cursor/touch tilt
+          const rotX = 0.72 + (pointer.y - 0.5) * 0.55 + Math.sin(time * 0.25) * 0.12;
+          const rotY = time * 0.22 + (pointer.x - 0.5) * 0.85;
+
+          // Around X
+          const y1 = y0 * Math.cos(rotX) - z0 * Math.sin(rotX);
+          const z1 = y0 * Math.sin(rotX) + z0 * Math.cos(rotX);
+
+          // Around Y
+          const x2 = x0 * Math.cos(rotY) + z1 * Math.sin(rotY);
+          const z2 = -x0 * Math.sin(rotY) + z1 * Math.cos(rotY);
+
+          const persp = 3.2 / (3.2 + z2 * 0.72);
+          return {
+            x: cx + x2 * scale * persp,
+            y: cy + y1 * scale * persp,
+            z: z2,
+            p: persp,
+          };
+        }
+
+        function draw() {
+          requestAnimationFrame(draw);
+          if (!isVisible) return;
+
+          try {
+            t += 0.012;
+            pointer.x += (pointer.tx - pointer.x) * 0.05;
+            pointer.y += (pointer.ty - pointer.y) * 0.05;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Subtle lithography micro-grid on dark silicon wafer
+            const grid = 44;
+            ctx.strokeStyle = 'rgba(56, 232, 255, 0.032)';
+            ctx.lineWidth = 1;
+            for (let gx = 0; gx < width; gx += grid) {
+              ctx.beginPath();
+              ctx.moveTo(gx, 0);
+              ctx.lineTo(gx, height);
+              ctx.stroke();
+            }
+            for (let gy = 0; gy < height; gy += grid) {
+              ctx.beginPath();
+              ctx.moveTo(0, gy);
+              ctx.lineTo(width, gy);
+              ctx.stroke();
+            }
+
+            // Ambient Toroid Core Glow
+            const gx = width * (width < 768 ? 0.52 : 0.67);
+            const gy = height * 0.52;
+            const aura = ctx.createRadialGradient(gx, gy, 15, gx, gy, Math.max(width, height) * 0.45);
+            aura.addColorStop(0, 'rgba(56, 232, 255, 0.13)');
+            aura.addColorStop(0.4, 'rgba(167, 139, 250, 0.06)');
+            aura.addColorStop(0.75, 'rgba(255, 158, 68, 0.035)');
+            aura.addColorStop(1, 'rgba(4, 6, 10, 0)');
+            ctx.fillStyle = aura;
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw Toroid Longitude Meridians (Cyan -> Violet phase)
+            const uRings = 24;
+            const vSteps = 28;
+            for (let i = 0; i < uRings; i++) {
+              const u = (i / uRings) * Math.PI * 2;
+              ctx.beginPath();
+              let depthSum = 0;
+              for (let j = 0; j <= vSteps; j++) {
+                const v = (j / vSteps) * Math.PI * 2;
+                const pt = projectTorus(u, v, t);
+                depthSum += pt.z;
+                if (j === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+              }
+              const avgZ = depthSum / (vSteps + 1);
+              const alpha = Math.max(0.06, Math.min(0.42, 0.24 - avgZ * 0.14));
+              ctx.strokeStyle = i % 4 === 0
+                ? `rgba(167, 139, 250, ${(alpha * 1.15).toFixed(3)})`
+                : `rgba(56, 232, 255, ${alpha.toFixed(3)})`;
+              ctx.lineWidth = i % 4 === 0 ? 1.1 : 0.75;
+              ctx.stroke();
+            }
+
+            // Draw Toroid Latitude Parallels (Ampere SM_86 Copper & Toroid Cyan)
+            const vRings = 12;
+            const uSteps = 44;
+            for (let j = 0; j < vRings; j++) {
+              const v = (j / vRings) * Math.PI * 2;
+              ctx.beginPath();
+              for (let i = 0; i <= uSteps; i++) {
+                const u = (i / uSteps) * Math.PI * 2;
+                const pt = projectTorus(u, v, t);
+                if (i === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+              }
+              const isEquator = j === 0 || j === vRings / 2;
+              ctx.strokeStyle = isEquator
+                ? 'rgba(255, 158, 68, 0.34)'
+                : 'rgba(56, 232, 255, 0.15)';
+              ctx.lineWidth = isEquator ? 1.35 : 0.75;
+              ctx.stroke();
+            }
+
+            // Draw Live CUDA Warp & Telemetry Packets on the Torus Surface
+            packets.forEach((p) => {
+              p.u += p.du;
+              p.v += p.dv;
+              const pt = projectTorus(p.u, p.v, t);
+              const colorCore = p.kind === 0
+                ? 'rgba(140, 244, 255, 0.95)'
+                : (p.kind === 1 ? 'rgba(255, 158, 68, 0.95)' : 'rgba(52, 211, 153, 0.95)');
+              const colorHalo = p.kind === 0
+                ? 'rgba(56, 232, 255, 0.22)'
+                : (p.kind === 1 ? 'rgba(255, 158, 68, 0.22)' : 'rgba(52, 211, 153, 0.22)');
+
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, 2.3 * pt.p, 0, Math.PI * 2);
+              ctx.fillStyle = colorCore;
+              ctx.fill();
+
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, 7.5 * pt.p, 0, Math.PI * 2);
+              ctx.fillStyle = colorHalo;
+              ctx.fill();
+            });
+          } catch (err) {
+            // Silently guard canvas frame
+          }
+        }
+
+        draw();
+      }
+
+      /* ------------------------------------------------------------------- */
+      /* 2. INTERACTIVE SOVEREIGN COMPUTE TOPOLOGY                           */
+      /* ------------------------------------------------------------------- */
+      const TOPO_NODES = [
+        {
+          id: 'sm86',
+          label: 'SM_86 Silicon Probe',
+          short: 'rtx3080_sm86.cu',
+          group: 'silicon',
+          x: 115, y: 95,
+          badge: 'CUDA Metal Probe',
+          size: '17.7 KB CUDA',
+          path: 'bench/rtx3080_sm86_silicon_probe.cu',
+          desc: 'Direct bare-metal CUDA kernel targeting NVIDIA Ampere SM_86 silicon. Measures real streaming multiprocessor warp residency, clock stability, and thermal die response without driver opacity.',
+          invariant: 'nvcc -arch=sm_86 → WarpOccupancy, ΔT_die, MemBW ∈ VerifiedEnvelope',
+        },
+        {
+          id: 'boot',
+          label: 'Boot & Bootstrap',
+          short: 'prep / bootstrap.sh',
+          group: 'silicon',
+          x: 115, y: 230,
+          badge: 'Provisioning Layer',
+          size: '11.6 KB Shell',
+          path: 'bin/{prep-boot-drive.sh, bootstrap-zenbook.sh}',
+          desc: 'Deterministic hardware genesis for the ASUS ZenBook Pro Duo UX582HS. Synthesizes sovereign boot media and configures kernel parameters, GPU drivers, and dual-screen topology from zero.',
+          invariant: 'Bootstrap(CleanMetal) == Reproducible(UX582HS_Spec)',
+        },
+        {
+          id: 'migrate',
+          label: 'Freeze & Restore',
+          short: 'freeze / restore.sh',
+          group: 'silicon',
+          x: 115, y: 365,
+          badge: 'Continuity Layer',
+          size: '12.0 KB Shell',
+          path: 'bin/{freeze-for-migration.sh, restore-and-verify.sh}',
+          desc: 'Captures atomic machine state before hardware transitions and resurrects the entire digital realm with automated epistemic verification on the target host.',
+          invariant: 'Hash(Restore(Freeze(State))) == Hash(State) ∧ EpistemicCheck = PASS',
+        },
+        {
+          id: 'rosen',
+          label: 'Thermal Rosen Guard',
+          short: 'thermal_rosen_guard',
+          group: 'thermal',
+          x: 325, y: 110,
+          badge: 'Homeostatic Control',
+          size: '28.2 KB Python',
+          path: 'bin/aletheion_thermal_rosen_guard.py',
+          desc: 'Continuous thermal boundary controller employing Rosen-inspired stability margins to keep high-density GPU/CPU silicon inside a provably safe, smooth operating envelope without violent clock cliffing.',
+          invariant: 'T_junction(t) + Margin_Rosen(dT/dt) ≤ T_crit  ∀ t',
+        },
+        {
+          id: 'therm-disp',
+          label: 'Display Thermal Guard',
+          short: 'therm_display_guard',
+          group: 'thermal',
+          x: 325, y: 245,
+          badge: 'Coupled Guard',
+          size: '25.2 KB Python',
+          path: 'bin/aletheion_therm_display_guard.py',
+          desc: 'Couples chassis thermal stress directly to dual-OLED luminance and refresh policies—shedding panel heat smoothly before thermal saturation degrades compute or harms OLED longevity.',
+          invariant: 'OLED_Power(eDP1, eDP2) = f_contract(T_chassis, RosenState)',
+        },
+        {
+          id: 'display',
+          label: 'Display Orchestrator',
+          short: 'aletheion_display.py',
+          group: 'display',
+          x: 325, y: 380,
+          badge: 'Dual-Plane Engine',
+          size: '24.4 KB Python',
+          path: 'bin/aletheion_display.py',
+          desc: 'Programmatic display controller managing eDP-1 (primary 4K OLED) and eDP-2 (ScreenPad Plus) scaling, touch calibration, brightness curves, and workspace choreography.',
+          invariant: 'Layout(eDP1 ⊕ eDP2) ∈ ValidUX582HSGeometries',
+        },
+        {
+          id: 'hypr',
+          label: 'Hyprland & Omarchy',
+          short: 'hypr + omarchy.lua',
+          group: 'display',
+          x: 545, y: 105,
+          badge: 'Wayland Compositor',
+          size: '3.3 KB Config',
+          path: 'configs/{hypr-zenbook-duo.conf, omarchy-4.5-ux582hs-monitors.lua}',
+          desc: 'Declarative Wayland compositor geometry binding Omarchy 4.5 monitor profiles with ZenBook Pro Duo dual-panel spatial rules and zero-latency keybinds.',
+          invariant: 'Compositor.Monitors == Omarchy4.5(UX582HS) ∩ HyprDuoRules',
+        },
+        {
+          id: 'toroid-hud',
+          label: 'Toroid ScreenPad HUD',
+          short: 'toroid-hud.py',
+          group: 'display',
+          x: 545, y: 240,
+          badge: 'Living Cockpit',
+          size: '31.7 KB Py+Sh',
+          path: 'bin/{toroid-hud.py, launch-screenpad-hud.sh}',
+          desc: 'Transforms the lower ScreenPad Plus into a real-time toroidal telemetry dashboard—projecting thermal margins, silicon load, and epistemic integrity directly into peripheral vision.',
+          invariant: 'HUD_Phase(t) ≅ State(SM86, RosenGuard, EpistemicVerifier)',
+        },
+        {
+          id: 'systemd',
+          label: 'Systemd Watchdogs',
+          short: 'watchdog.service',
+          group: 'thermal',
+          x: 545, y: 375,
+          badge: 'Autonomous Supervisors',
+          size: '1.3 KB Units',
+          path: 'systemd/{aletheia-toroid-watchdog.{service,timer}, aletheion-therm-display-guard.service}',
+          desc: 'Kernel-supervised systemd services and timers ensuring the Toroid HUD and thermal-display guard resurrect immediately on any fault and beat on deterministic intervals.',
+          invariant: 'Restart=always ∧ WatchdogTimer(aletheia-toroid) == ACTIVE',
+        },
+        {
+          id: 'epistemic',
+          label: 'Epistemic Verifier',
+          short: 'verify_epistemic.py',
+          group: 'epistemic',
+          x: 740, y: 145,
+          badge: 'Epistemic Gate',
+          size: '25.4 KB Python',
+          path: 'bin/verify_epistemic_integrity.py',
+          desc: 'Audits machine configuration, thermal policies, script hashes, and runtime invariants—refusing silent configuration drift across reboots and hardware migrations.',
+          invariant: 'EpistemicIntegrity(Node) ⇔ ∀ inv ∈ MachineSpec, Hold(inv)',
+        },
+        {
+          id: 'r5-shell',
+          label: 'R5 Shell Test Suite',
+          short: 'test_aletheia_shell_r5',
+          group: 'epistemic',
+          x: 740, y: 275,
+          badge: 'R5 Formal Harness',
+          size: '48.3 KB Python',
+          path: 'tests/test_aletheia_shell_r5.py',
+          desc: 'Exhaustive 48.3 KB R5 verification harness proving lifecycle scripts, migration guards, and shell orchestration handle fault injection without corrupting sovereign state.',
+          invariant: 'R5_ShellSuite(AllFaultVectors) == 100% PASS',
+        },
+        {
+          id: 'r5-guard',
+          label: 'R5 Guard Test Suite',
+          short: 'test_display_guard_r5',
+          group: 'epistemic',
+          x: 740, y: 395,
+          badge: 'R5 Thermal Harness',
+          size: '22.9 KB Python',
+          path: 'tests/test_aletheion_display_thermal_guard_r5.py',
+          desc: 'Dedicated R5 adversarial test suite verifying display-thermal guard hysteresis, Rosen threshold transitions, and safe degradation under extreme simulated heat.',
+          invariant: 'R5_GuardSuite(ThermalExcursions) ⇒ SafeClamp ∧ NoOscillation',
+        },
+      ];
+
+      const TOPO_EDGES = [
+        ['sm86', 'rosen'],
+        ['sm86', 'toroid-hud'],
+        ['boot', 'display'],
+        ['boot', 'hypr'],
+        ['migrate', 'epistemic'],
+        ['rosen', 'therm-disp'],
+        ['rosen', 'toroid-hud'],
+        ['therm-disp', 'display'],
+        ['therm-disp', 'systemd'],
+        ['display', 'hypr'],
+        ['display', 'toroid-hud'],
+        ['hypr', 'toroid-hud'],
+        ['systemd', 'toroid-hud'],
+        ['systemd', 'epistemic'],
+        ['toroid-hud', 'epistemic'],
+        ['epistemic', 'r5-shell'],
+        ['therm-disp', 'r5-guard'],
+        ['rosen', 'r5-guard'],
+        ['r5-shell', 'migrate'],
+      ];
+
+      const TOPO_COLORS = {
+        silicon: { stroke: '#FF9E44', fill: '#261508', text: '#FFD099', badge: 'bg-ampere-900/80 text-ampere-300 border-ampere-400/35' },
+        display: { stroke: '#38E8FF', fill: '#07202B', text: '#8CF4FF', badge: 'bg-toroid-900/80 text-toroid-300 border-toroid-400/35' },
+        thermal: { stroke: '#34D399', fill: '#08241B', text: '#6EE7B7', badge: 'bg-verified-900/80 text-verified-300 border-verified-400/35' },
+        epistemic: { stroke: '#A78BFA', fill: '#191130', text: '#C4B5FD', badge: 'bg-epistemic-900/80 text-epistemic-300 border-epistemic-400/35' },
+      };
+
+      function initTopologyGraph() {
+        const edgesG = document.getElementById('topo-edges');
+        const nodesG = document.getElementById('topo-nodes');
+        const pulsesG = document.getElementById('topo-pulses');
+        if (!edgesG || !nodesG || !pulsesG) return;
+
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const map = Object.fromEntries(TOPO_NODES.map((n) => [n.id, n]));
+        let selectedId = 'sm86';
+        let activeFilter = 'all';
+
+        function el(tag, attrs = {}) {
+          const e = document.createElementNS(svgNS, tag);
+          Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+          return e;
+        }
+
+        function edgePath(a, b) {
+          if (a.id === 'r5-shell' && b.id === 'migrate') {
+            return `M ${a.x} ${a.y + 20} C ${a.x - 160} ${a.y + 185}, ${b.x + 190} ${b.y + 115}, ${b.x} ${b.y + 22}`;
+          }
+          const dx = (b.x - a.x) * 0.5;
+          return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`;
+        }
+
+        function selectNode(id) {
+          const n = map[id];
+          if (!n) return;
+          selectedId = id;
+          const col = TOPO_COLORS[n.group];
+
+          const badge = document.getElementById('insp-badge');
+          badge.textContent = n.badge;
+          badge.className = `px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest border ${col.badge}`;
+
+          document.getElementById('insp-size').textContent = n.size;
+          document.getElementById('insp-title').textContent = n.label;
+          document.getElementById('insp-path').textContent = n.path;
+          document.getElementById('insp-desc').textContent = n.desc;
+          document.getElementById('insp-invariant').textContent = n.invariant;
+
+          const ins = TOPO_EDGES.filter(([, d]) => d === id).map(([s]) => map[s]);
+          const outs = TOPO_EDGES.filter(([s]) => s === id).map(([, d]) => map[d]);
+
+          const inBox = document.getElementById('insp-inputs');
+          const outBox = document.getElementById('insp-outputs');
+          inBox.innerHTML = ins.length
+            ? ins.map((x) => `<button type="button" data-jump="${x.id}" class="text-left hover:text-toroid-300 transition-colors">← ${x.label}</button>`).join('')
+            : '<span class="text-chrome-500">Hardware Root</span>';
+          outBox.innerHTML = outs.length
+            ? outs.map((x) => `<button type="button" data-jump="${x.id}" class="text-left hover:text-ampere-300 transition-colors">→ ${x.label}</button>`).join('')
+            : '<span class="text-chrome-500">Verification Sink</span>';
+
+          inBox.querySelectorAll('[data-jump]').forEach((b) => b.addEventListener('click', () => selectNode(b.dataset.jump)));
+          outBox.querySelectorAll('[data-jump]').forEach((b) => b.addEventListener('click', () => selectNode(b.dataset.jump)));
+
+          render();
+        }
+
+        function render() {
+          edgesG.innerHTML = '';
+          nodesG.innerHTML = '';
+
+          const neighbors = new Set([selectedId]);
+          TOPO_EDGES.forEach(([s, d]) => {
+            if (s === selectedId) neighbors.add(d);
+            if (d === selectedId) neighbors.add(s);
+          });
+
+          TOPO_EDGES.forEach(([sId, dId]) => {
+            const s = map[sId];
+            const d = map[dId];
+            const conn = sId === selectedId || dId === selectedId;
+            const match = activeFilter === 'all' || s.group === activeFilter || d.group === activeFilter;
+            const isFeedback = sId === 'r5-shell' && dId === 'migrate';
+
+            edgesG.appendChild(el('path', {
+              d: edgePath(s, d),
+              fill: 'none',
+              stroke: conn ? 'url(#cyber-edge-grad)' : (isFeedback ? '#A78BFA' : '#7D8DA8'),
+              'stroke-width': conn ? '2.2' : '1.1',
+              'stroke-opacity': !match ? '0.08' : (conn ? '0.95' : '0.26'),
+              'stroke-dasharray': conn || isFeedback ? '5 4' : 'none',
+              class: conn ? 'animate-dash-flow' : '',
+            }));
+          });
+
+          TOPO_NODES.forEach((n) => {
+            const col = TOPO_COLORS[n.group];
+            const isSel = n.id === selectedId;
+            const isNb = neighbors.has(n.id);
+            const match = activeFilter === 'all' || n.group === activeFilter;
+
+            const g = el('g', {
+              transform: `translate(${n.x}, ${n.y})`,
+              class: 'cursor-pointer transition-opacity duration-200',
+              opacity: !match ? '0.22' : (isNb ? '1' : '0.68'),
+            });
+
+            if (isSel) {
+              g.appendChild(el('rect', {
+                x: -76, y: -26, width: 152, height: 52, rx: 14,
+                fill: 'none',
+                stroke: col.stroke,
+                'stroke-width': '1.6',
+                'stroke-opacity': '0.6',
+                filter: 'url(#cyber-glow)',
+              }));
+            }
+
+            g.appendChild(el('rect', {
+              x: -70, y: -21, width: 140, height: 42, rx: 11,
+              fill: col.fill,
+              stroke: col.stroke,
+              'stroke-width': isSel ? '2' : '1.1',
+              'stroke-opacity': isSel ? '1' : '0.65',
+            }));
+
+            g.appendChild(el('circle', { cx: -55, cy: -5, r: 3.2, fill: col.stroke }));
+
+            const t1 = el('text', {
+              x: -44, y: -1,
+              fill: '#F4F7FC',
+              'font-family': 'Space Grotesk, Inter, sans-serif',
+              'font-size': '11',
+              'font-weight': '600',
+            });
+            t1.textContent = n.label;
+            g.appendChild(t1);
+
+            const t2 = el('text', {
+              x: -44, y: 12,
+              fill: col.text,
+              'font-family': 'JetBrains Mono, monospace',
+              'font-size': '8.5',
+              opacity: '0.9',
+            });
+            t2.textContent = n.short;
+            g.appendChild(t2);
+
+            g.addEventListener('click', () => selectNode(n.id));
+            nodesG.appendChild(g);
+          });
+        }
+
+        document.querySelectorAll('.topo-filter-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            activeFilter = btn.dataset.filter;
+            document.querySelectorAll('.topo-filter-btn').forEach((b) => {
+              b.classList.remove('bg-chrome-50', 'text-silicon-950', 'font-semibold');
+              if (b.dataset.filter === 'all') {
+                b.classList.add('bg-silicon-850', 'text-chrome-200', 'border', 'border-chrome-100/15');
+              }
+            });
+            btn.classList.remove('bg-silicon-850');
+            btn.classList.add('bg-chrome-50', 'text-silicon-950', 'font-semibold');
+            render();
+          });
+        });
+
+        // Live Pulse Animation
+        let pulsing = false;
+        const pulseBtn = document.getElementById('pulse-topo-btn');
+        const readout = document.getElementById('topo-stage-readout');
+        if (pulseBtn) {
+          pulseBtn.addEventListener('click', () => {
+            if (pulsing) return;
+            pulsing = true;
+            pulsesG.innerHTML = '';
+
+            const stages = [
+              { msg: 'Stage 1/4: Probing RTX 3080 SM_86 silicon & UX582HS hardware rails...', edges: [['sm86', 'rosen'], ['sm86', 'toroid-hud'], ['boot', 'display'], ['boot', 'hypr']] },
+              { msg: 'Stage 2/4: Evaluating Rosen thermal margins & coupled OLED power guard...', edges: [['rosen', 'therm-disp'], ['therm-disp', 'display'], ['therm-disp', 'systemd'], ['display', 'hypr']] },
+              { msg: 'Stage 3/4: Updating ScreenPad Plus Toroid HUD & systemd watchdogs...', edges: [['rosen', 'toroid-hud'], ['display', 'toroid-hud'], ['hypr', 'toroid-hud'], ['systemd', 'toroid-hud']] },
+              { msg: 'Stage 4/4: Locking verify_epistemic_integrity.py + R5 suites (PASS ✓)', edges: [['toroid-hud', 'epistemic'], ['systemd', 'epistemic'], ['epistemic', 'r5-shell'], ['therm-disp', 'r5-guard'], ['r5-shell', 'migrate']] },
+            ];
+
+            let idx = 0;
+            function nextStage() {
+              if (idx >= stages.length) {
+                pulsing = false;
+                if (readout) readout.textContent = 'Silicon-to-HUD Pulse Complete · All 12 Subsystems Locked';
+                showToast('Full ALETHEION telemetry & R5 integrity pulse passed');
+                return;
+              }
+              const st = stages[idx];
+              if (readout) readout.textContent = st.msg;
+              pulsesG.innerHTML = '';
+
+              const items = st.edges.map(([s, d]) => {
+                const p = el('path', { d: edgePath(map[s], map[d]), fill: 'none', stroke: 'none' });
+                pulsesG.appendChild(p);
+                const dot = el('circle', { r: 4.5, fill: '#38E8FF', filter: 'url(#cyber-glow)' });
+                pulsesG.appendChild(dot);
+                return { p, dot, len: p.getTotalLength() };
+              });
+
+              const t0 = performance.now();
+              const dur = 800;
+              function step(now) {
+                const k = Math.min(1, (now - t0) / dur);
+                items.forEach(({ p, dot, len }) => {
+                  const pt = p.getPointAtLength(len * k);
+                  dot.setAttribute('cx', pt.x);
+                  dot.setAttribute('cy', pt.y);
+                  dot.setAttribute('opacity', String(1 - k * 0.25));
+                });
+                if (k < 1) requestAnimationFrame(step);
+                else {
+                  idx++;
+                  nextStage();
+                }
+              }
+              requestAnimationFrame(step);
+            }
+            nextStage();
+          });
+        }
+
+        selectNode('sm86');
+      }
+
+      /* ------------------------------------------------------------------- */
+      /* 3. LIVE DUAL-SCREEN UX582HS COCKPIT (SM_86 DIE + TOROID HUD)        */
+      /* ------------------------------------------------------------------- */
+      function initDualCockpit() {
+        const dieCanvas = document.getElementById('sm86-die-canvas');
+        const hudCanvas = document.getElementById('screenpad-toroid-canvas');
+        if (!dieCanvas || !hudCanvas) return;
+        const dieCtx = dieCanvas.getContext('2d');
+        const hudCtx = hudCanvas.getContext('2d');
+        if (!dieCtx || !hudCtx) return;
+
+        const sliders = {
+          cuda: document.getElementById('sl-cuda'),
+          ambient: document.getElementById('sl-ambient'),
+          nits: document.getElementById('sl-nits'),
+          guard: document.getElementById('sl-guard'),
+        };
+
+        const sim = {
+          cuda: 38,
+          ambient: 26,
+          nits: 320,
+          guard: 72,
+          temp: 58.4,
+          rosenMargin: 24.6,
+          clampPct: 0,
+          mode: 'HOMEOSTATIC', // HOMEOSTATIC | CLAMPING | CRITICAL | FROZEN
+          frozen: false,
+          t: 0,
+        };
+
+        // 68 Streaming Multiprocessors (Ampere RTX 3080 GA102 SM_86 layout: 17 x 4 grid)
+        const smSeeds = Array.from({ length: 68 }, (_, i) => ({
+          phase: (i * 0.41) % (Math.PI * 2),
+          bias: 0.75 + ((i * 19) % 10) * 0.04,
+        }));
+
+        let dieW = 0, dieH = 0, hudW = 0, hudH = 0, dpr = 1;
+        let visible = true;
+
+        function resizeAll() {
+          dpr = Math.min(window.devicePixelRatio || 1, 2);
+          const r1 = dieCanvas.parentElement.getBoundingClientRect();
+          dieW = Math.max(260, r1.width);
+          dieH = Math.max(200, r1.height);
+          dieCanvas.width = Math.floor(dieW * dpr);
+          dieCanvas.height = Math.floor(dieH * dpr);
+          dieCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+          const r2 = hudCanvas.parentElement.getBoundingClientRect();
+          hudW = Math.max(260, r2.width);
+          hudH = Math.max(110, r2.height);
+          hudCanvas.width = Math.floor(hudW * dpr);
+          hudCanvas.height = Math.floor(hudH * dpr);
+          hudCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        if ('IntersectionObserver' in window) {
+          const obs = new IntersectionObserver((entries) => {
+            visible = entries[0] ? entries[0].isIntersecting : true;
+          }, { threshold: 0.05 });
+          obs.observe(dieCanvas);
+        }
+
+        window.addEventListener('resize', resizeAll);
+        resizeAll();
+
+        function evaluateMachine() {
+          sim.cuda = Number(sliders.cuda.value);
+          sim.ambient = Number(sliders.ambient.value);
+          sim.nits = Number(sliders.nits.value);
+          sim.guard = Number(sliders.guard.value);
+
+          document.getElementById('read-cuda').textContent = `${sim.cuda} %`;
+          document.getElementById('read-ambient').textContent = `${sim.ambient} °C`;
+          document.getElementById('read-nits').textContent = `${sim.nits} nits`;
+          document.getElementById('read-guard').textContent = `${(sim.guard / 100).toFixed(2)} κ`;
+
+          // Coupled physical thermal model for UX582HS + RTX 3080 Mobile SM_86
+          const guardGain = sim.guard / 100;
+          const rawTemp = sim.ambient + sim.cuda * 0.56 + (sim.nits / 500) * 8.5 - guardGain * 11.0;
+          sim.temp = Math.max(31.0, Math.min(97.5, rawTemp));
+
+          const tCrit = 87.0;
+          sim.rosenMargin = tCrit - sim.temp;
+
+          // Display-thermal guard clamp computation
+          if (sim.frozen) {
+            sim.mode = 'FROZEN';
+            sim.clampPct = 100;
+          } else if (sim.rosenMargin > 12) {
+            sim.mode = 'HOMEOSTATIC';
+            sim.clampPct = 0;
+          } else if (sim.rosenMargin > 2.5) {
+            sim.mode = 'CLAMPING';
+            sim.clampPct = Math.round(((12 - sim.rosenMargin) / 9.5) * 45);
+          } else {
+            sim.mode = 'CRITICAL';
+            sim.clampPct = Math.min(75, Math.round(45 + (2.5 - sim.rosenMargin) * 6));
+          }
+
+          const effectiveNits = Math.max(40, Math.round(sim.nits * (1 - sim.clampPct / 100)));
+          const clockMhz = sim.frozen ? 210 : (sim.mode === 'CRITICAL' ? 1140 : (sim.mode === 'CLAMPING' ? 1485 : 1710 + Math.round(sim.cuda * 1.4)));
+
+          const dot = document.getElementById('cockpit-status-dot');
+          const badge = document.getElementById('cockpit-status-badge');
+          const edp1 = document.getElementById('edp1-refresh');
+          const edp2 = document.getElementById('edp2-guard-state');
+          const logLine = document.getElementById('cockpit-log-line');
+
+          if (sim.mode === 'FROZEN') {
+            dot.className = 'w-2.5 h-2.5 rounded-full bg-epistemic-400 animate-pulse';
+            badge.className = 'font-mono text-xs font-semibold uppercase tracking-widest text-epistemic-300';
+            badge.textContent = 'FREEZE-FOR-MIGRATION: ATOMIC SNAPSHOT LOCKED';
+            edp1.textContent = 'QUIESCED · 0 nits';
+            edp2.textContent = 'HUD: SNAPSHOT CHECKSUMMED';
+            edp2.className = 'text-epistemic-300';
+            logLine.textContent = '[freeze-for-migration.sh] Daemons quiesced, NVMe dirty pages flushed, cryptographic state manifest sealed for restore-and-verify.sh.';
+          } else if (sim.mode === 'HOMEOSTATIC') {
+            dot.className = 'w-2.5 h-2.5 rounded-full bg-verified-400';
+            badge.className = 'font-mono text-xs font-semibold uppercase tracking-widest text-verified-400';
+            badge.textContent = 'ROSEN & DISPLAY GUARD: HOMEOSTATIC';
+            edp1.textContent = `60 Hz · ${effectiveNits} nits`;
+            edp2.textContent = 'LUMINANCE: FULL · WATCHDOG: ARMED';
+            edp2.className = 'text-verified-400';
+            logLine.textContent = `[aletheion_thermal_rosen_guard] SM_86 running at ${clockMhz} MHz with +${sim.rosenMargin.toFixed(1)} K Rosen reserve; ScreenPad Plus Toroid HUD nominal.`;
+          } else if (sim.mode === 'CLAMPING') {
+            dot.className = 'w-2.5 h-2.5 rounded-full bg-ampere-400 animate-pulse';
+            badge.className = 'font-mono text-xs font-semibold uppercase tracking-widest text-ampere-300';
+            badge.textContent = 'DISPLAY-THERMAL GUARD: SMOOTH CLAMP ENGAGED';
+            edp1.textContent = `60 Hz · ${effectiveNits} nits (-${sim.clampPct}%)`;
+            edp2.textContent = `SCREENPAD DIMMED (-${sim.clampPct}%)`;
+            edp2.className = 'text-ampere-300';
+            logLine.textContent = `[aletheion_therm_display_guard] Approaching Rosen thermal wall (${sim.temp.toFixed(1)} °C). Smoothly attenuating dual-OLED luminance by ${sim.clampPct}% to preserve SM_86 throughput.`;
+          } else {
+            dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-400 animate-ping';
+            badge.className = 'font-mono text-xs font-semibold uppercase tracking-widest text-rose-400';
+            badge.textContent = 'ROSEN BOUNDARY INTERVENTION · THERMAL GUARD ACTIVE';
+            edp1.textContent = `48 Hz · ${effectiveNits} nits (CLAMP)`;
+            edp2.textContent = 'ALERT MODE · FAN & POWER CAP';
+            edp2.className = 'text-rose-400';
+            logLine.textContent = `[aletheion_thermal_rosen_guard] Critical silicon flux (${sim.temp.toFixed(1)} °C). Enforcing Rosen boundary clamp, capping SM_86 to ${clockMhz} MHz, and holding epistemic lock.`;
+          }
+
+          document.getElementById('tel-temp').textContent = `${sim.temp.toFixed(1)} °C`;
+          document.getElementById('tel-rosen').textContent = `${sim.rosenMargin >= 0 ? '+' : ''}${sim.rosenMargin.toFixed(1)} K`;
+          document.getElementById('tel-clamp').textContent = sim.clampPct === 0 ? '0% (Full)' : `-${sim.clampPct}%`;
+          document.getElementById('tel-hash').textContent = sim.frozen ? 'SEALED' : 'R5 PASS';
+        }
+
+        Object.values(sliders).forEach((sl) => {
+          sl.addEventListener('input', () => {
+            sim.frozen = false;
+            evaluateMachine();
+          });
+        });
+
+        // Preset buttons
+        const REGIMES = {
+          zen: { cuda: 34, ambient: 24, nits: 300, guard: 76, frozen: false },
+          cuda: { cuda: 92, ambient: 29, nits: 380, guard: 80, frozen: false },
+          rosen: { cuda: 96, ambient: 48, nits: 480, guard: 28, frozen: false },
+          freeze: { cuda: 5, ambient: 22, nits: 60, guard: 95, frozen: true },
+        };
+
+        document.querySelectorAll('.regime-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const r = REGIMES[btn.dataset.regime];
+            if (!r) return;
+            sim.frozen = r.frozen;
+            sliders.cuda.value = r.cuda;
+            sliders.ambient.value = r.ambient;
+            sliders.nits.value = r.nits;
+            sliders.guard.value = r.guard;
+            evaluateMachine();
+          });
+        });
+
+        // Smooth Rosen Auto-Homeostasis button
+        const rosenBtn = document.getElementById('engage-rosen-btn');
+        if (rosenBtn) {
+          rosenBtn.addEventListener('click', () => {
+            sim.frozen = false;
+            const target = { cuda: 58, ambient: 24, nits: 280, guard: 88 };
+            const start = {
+              cuda: Number(sliders.cuda.value),
+              ambient: Number(sliders.ambient.value),
+              nits: Number(sliders.nits.value),
+              guard: Number(sliders.guard.value),
+            };
+            let step = 0;
+            const total = 24;
+            function anim() {
+              step++;
+              const k = 1 - Math.pow(1 - step / total, 3);
+              sliders.cuda.value = Math.round(start.cuda + (target.cuda - start.cuda) * k);
+              sliders.ambient.value = Math.round(start.ambient + (target.ambient - start.ambient) * k);
+              sliders.nits.value = Math.round(start.nits + (target.nits - start.nits) * k);
+              sliders.guard.value = Math.round(start.guard + (target.guard - start.guard) * k);
+              evaluateMachine();
+              if (step < total) requestAnimationFrame(anim);
+              else showToast('Rosen thermal homeostasis restored · SM_86 envelope optimal');
+            }
+            requestAnimationFrame(anim);
+          });
+        }
+
+        function renderCockpitFrames() {
+          requestAnimationFrame(renderCockpitFrames);
+          if (!visible) return;
+
+          try {
+            sim.t += sim.frozen ? 0.004 : 0.028;
+
+            /* ---- CANVAS A: PRIMARY DISPLAY (eDP-1) SM_86 DIE MATRIX ---- */
+            dieCtx.clearRect(0, 0, dieW, dieH);
+
+            // Split view: Left 62% SM_86 68-SM Silicon Die Floorplan, Right 38% Rosen Thermal Phase Wave
+            const splitX = dieW * 0.62;
+
+            // Die background border
+            const pad = 16;
+            const dieBoxW = splitX - pad * 1.5;
+            const dieBoxH = dieH - pad * 2;
+            dieCtx.strokeStyle = 'rgba(56, 232, 255, 0.22)';
+            dieCtx.lineWidth = 1;
+            dieCtx.strokeRect(pad, pad, dieBoxW, dieBoxH);
+
+            // Draw 68 SM_86 tiles (17 cols x 4 rows)
+            const cols = 17;
+            const rows = 4;
+            const gap = 4;
+            const cellW = (dieBoxW - 16 - gap * (cols - 1)) / cols;
+            const cellH = (dieBoxH - 36 - gap * (rows - 1)) / rows;
+
+            dieCtx.fillStyle = '#7D8DA8';
+            dieCtx.font = '10px "JetBrains Mono", monospace';
+            dieCtx.fillText('GA102 / SM_86 · 68 STREAMING MULTIPROCESSORS', pad + 8, pad + 15);
+
+            const loadFrac = sim.cuda / 100;
+            const heatFrac = Math.max(0, Math.min(1, (sim.temp - 35) / 60));
+
+            for (let r = 0; r < rows; r++) {
+              for (let c = 0; c < cols; c++) {
+                const idx = r * cols + c;
+                const seed = smSeeds[idx];
+                const wave = 0.5 + 0.5 * Math.sin(sim.t * (1.5 + loadFrac * 3.5) + seed.phase);
+                const occ = sim.frozen ? 0.08 : Math.min(1, loadFrac * seed.bias * (0.6 + 0.4 * wave));
+
+                const x = pad + 8 + c * (cellW + gap);
+                const y = pad + 24 + r * (cellH + gap);
+
+                // Interpolate color from cool cyan -> ampere copper -> thermal rose
+                let fill;
+                if (sim.frozen) {
+                  fill = `rgba(167, 139, 250, ${(0.18 + wave * 0.14).toFixed(2)})`;
+                } else if (heatFrac > 0.72 && occ > 0.55) {
+                  fill = `rgba(251, 113, 133, ${(0.25 + occ * 0.7).toFixed(2)})`;
+                } else if (occ > 0.52) {
+                  fill = `rgba(255, 158, 68, ${(0.22 + occ * 0.72).toFixed(2)})`;
+                } else {
+                  fill = `rgba(56, 232, 255, ${(0.12 + occ * 0.65).toFixed(2)})`;
+                }
+
+                dieCtx.fillStyle = fill;
+                dieCtx.fillRect(x, y, Math.max(2, cellW), Math.max(2, cellH));
+              }
+            }
+
+            // Right Pane: Live Rosen Stability Phase Oscilloscope
+            const oscX = splitX + 8;
+            const oscW = dieW - oscX - pad;
+            const oscY = pad;
+            const oscH = dieH - pad * 2;
+            dieCtx.strokeStyle = 'rgba(167, 139, 250, 0.25)';
+            dieCtx.strokeRect(oscX, oscY, oscW, oscH);
+
+            dieCtx.fillStyle = '#C4B5FD';
+            dieCtx.font = '10px "JetBrains Mono", monospace';
+            dieCtx.fillText('ROSEN THERMAL ENVELOPE', oscX + 8, oscY + 15);
+
+            // Critical Rosen ceiling line
+            const critY = oscY + 42;
+            dieCtx.strokeStyle = 'rgba(251, 113, 133, 0.65)';
+            dieCtx.setLineDash([4, 3]);
+            dieCtx.beginPath();
+            dieCtx.moveTo(oscX + 6, critY);
+            dieCtx.lineTo(oscX + oscW - 6, critY);
+            dieCtx.stroke();
+            dieCtx.setLineDash([]);
+            dieCtx.fillStyle = '#FB7185';
+            dieCtx.font = '9px "JetBrains Mono", monospace';
+            dieCtx.fillText('T_CRIT 87°C', oscX + oscW - 66, critY - 4);
+
+            // Live temperature trajectory waveform
+            dieCtx.beginPath();
+            const pts = 42;
+            const baseTraceY = oscY + oscH - 22 - heatFrac * (oscH - 68);
+            const amp = sim.frozen ? 1.2 : (3 + (1 - sim.guard / 100) * 14);
+            for (let i = 0; i <= pts; i++) {
+              const px = oscX + 8 + (i / pts) * (oscW - 16);
+              const py = Math.max(oscY + 26, Math.min(oscY + oscH - 12,
+                baseTraceY + Math.sin(sim.t * 2.4 + i * 0.32) * amp + Math.cos(sim.t * 1.1 - i * 0.19) * (amp * 0.45)
+              ));
+              if (i === 0) dieCtx.moveTo(px, py);
+              else dieCtx.lineTo(px, py);
+            }
+            dieCtx.strokeStyle = sim.mode === 'CRITICAL' ? '#FB7185' : (sim.mode === 'CLAMPING' ? '#FF9E44' : '#34D399');
+            dieCtx.lineWidth = 2;
+            dieCtx.stroke();
+
+            /* ---- CANVAS B: SCREENPAD PLUS (eDP-2) TOROID HUD MIRROR ---- */
+            hudCtx.clearRect(0, 0, hudW, hudH);
+
+            // Subtle OLED dimming attenuation visual
+            const lumAlpha = sim.frozen ? 0.35 : (0.55 + (1 - sim.clampPct / 100) * 0.45);
+
+            // Left Wing: Telemetry Bars
+            const wingW = Math.min(130, hudW * 0.28);
+            hudCtx.fillStyle = `rgba(56, 232, 255, ${(0.8 * lumAlpha).toFixed(2)})`;
+            hudCtx.font = '9px "JetBrains Mono", monospace';
+            hudCtx.fillText('WARP OCC', 14, 24);
+            hudCtx.fillStyle = 'rgba(255,255,255,0.08)';
+            hudCtx.fillRect(14, 30, wingW - 20, 6);
+            hudCtx.fillStyle = `rgba(255, 158, 68, ${lumAlpha.toFixed(2)})`;
+            hudCtx.fillRect(14, 30, (wingW - 20) * loadFrac, 6);
+
+            hudCtx.fillStyle = `rgba(52, 211, 153, ${(0.85 * lumAlpha).toFixed(2)})`;
+            hudCtx.fillText('ROSEN RESERVE', 14, 58);
+            hudCtx.fillStyle = 'rgba(255,255,255,0.08)';
+            hudCtx.fillRect(14, 64, wingW - 20, 6);
+            const reserveFrac = Math.max(0.05, Math.min(1, (sim.rosenMargin + 5) / 45));
+            hudCtx.fillStyle = sim.mode === 'CRITICAL' ? '#FB7185' : `rgba(52, 211, 153, ${lumAlpha.toFixed(2)})`;
+            hudCtx.fillRect(14, 64, (wingW - 20) * reserveFrac, 6);
+
+            hudCtx.fillStyle = `rgba(196, 181, 253, ${(0.85 * lumAlpha).toFixed(2)})`;
+            hudCtx.fillText('WATCHDOG BEAT', 14, 92);
+            const beatX = 14 + ((sim.t * 36) % Math.max(20, wingW - 26));
+            hudCtx.fillStyle = 'rgba(167, 139, 250, 0.25)';
+            hudCtx.fillRect(14, 98, wingW - 20, 4);
+            hudCtx.fillStyle = '#A78BFA';
+            hudCtx.fillRect(beatX, 97, 8, 6);
+
+            // Center: Spinning 3D Wireframe Toroid (`toroid-hud.py`)
+            const tcx = hudW * 0.5;
+            const tcy = hudH * 0.52;
+            const tScale = Math.min(hudH * 0.36, 46);
+            const spin = sim.t * (0.65 + loadFrac * 1.4);
+            const toroidStroke = sim.frozen
+              ? `rgba(167, 139, 250, ${lumAlpha.toFixed(2)})`
+              : (sim.mode === 'CRITICAL'
+                ? `rgba(251, 113, 133, ${lumAlpha.toFixed(2)})`
+                : (sim.mode === 'CLAMPING'
+                  ? `rgba(255, 158, 68, ${lumAlpha.toFixed(2)})`
+                  : `rgba(56, 232, 255, ${lumAlpha.toFixed(2)})`));
+
+            for (let i = 0; i < 16; i++) {
+              const u = (i / 16) * Math.PI * 2 + spin * 0.5;
+              hudCtx.beginPath();
+              for (let j = 0; j <= 16; j++) {
+                const v = (j / 16) * Math.PI * 2;
+                const x0 = (1.15 + 0.45 * Math.cos(v)) * Math.cos(u);
+                const y0 = (1.15 + 0.45 * Math.cos(v)) * Math.sin(u);
+                const z0 = 0.45 * Math.sin(v);
+
+                const y1 = y0 * Math.cos(0.95) - z0 * Math.sin(0.95);
+                const z1 = y0 * Math.sin(0.95) + z0 * Math.cos(0.95);
+                const px = tcx + x0 * tScale * (2.6 / (2.6 + z1 * 0.6));
+                const py = tcy + y1 * tScale * (2.6 / (2.6 + z1 * 0.6));
+                if (j === 0) hudCtx.moveTo(px, py);
+                else hudCtx.lineTo(px, py);
+              }
+              hudCtx.strokeStyle = toroidStroke;
+              hudCtx.lineWidth = 0.9;
+              hudCtx.stroke();
+            }
+
+            // Right Wing: Epistemic & Compositor Readout
+            const rx = hudW - wingW + 8;
+            hudCtx.fillStyle = `rgba(226, 233, 244, ${(0.85 * lumAlpha).toFixed(2)})`;
+            hudCtx.font = '9px "JetBrains Mono", monospace';
+            hudCtx.fillText(`T_J : ${sim.temp.toFixed(1)}°C`, rx, 28);
+            hudCtx.fillText(`NITS: ${Math.round(sim.nits * (1 - sim.clampPct / 100))}`, rx, 50);
+            hudCtx.fillText(`MODE: ${sim.mode.slice(0, 8)}`, rx, 72);
+            hudCtx.fillStyle = `rgba(52, 211, 153, ${lumAlpha.toFixed(2)})`;
+            hudCtx.fillText('R5  : VERIFIED', rx, 94);
+          } catch (err) {
+            // Silently protect animation loop
+          }
+        }
+
+        evaluateMachine();
+        renderCockpitFrames();
+      }
+
+      /* ------------------------------------------------------------------- */
+      /* 4. ARCHITECTURE PLAYBOOK READER                                     */
+      /* ------------------------------------------------------------------- */
+      const PLAYBOOK_CHAPTERS = [
+        {
+          source: 'README.md · 5,690 bytes',
+          index: 'Movement 01 / 05',
+          title: 'Aletheia in Silicon: The Unconcealed Workstation',
+          paragraphs: [
+            'In Greek philosophy, aletheia means unconcealment—bringing hidden reality into clear view. ALETHEION applies that ethos to personal and research supercomputing: tearing away opaque OS defaults so every watt, thermal gradient, pixel plane, and CUDA warp becomes legible and controllable.',
+            'Rather than treating a laptop workstation as a disposable black box, ALETHEION elevates the ZenBook Pro Duo UX582HS into a sovereign, self-auditing instrument—bridging bare-metal physics with formal verification discipline.',
+            'Every script, daemon, compositor rule, and test vector inside aletheion-main exists to guarantee that the machine operates at peak silicon efficiency without ever sacrificing stability or epistemic truth.'
+          ],
+          axiomLabel: 'Foundational Machine Axiom',
+          axiom: 'Aletheion := UnconcealedSilicon(SM_86) ⊗ SpatialCockpit(UX582HS) ⊗ EpistemicLock(R5)',
+          marginalia: '“A machine whose internal state is hidden from its operator cannot serve as a vessel for rigorous discovery.”',
+          artifacts: ['README.md', 'LICENSE', 'bin/verify_epistemic_integrity.py'],
+          status: 'Core vision unifying all 30 entries across bench/, bin/, configs/, docs/, systemd/, and tests/.',
+        },
+        {
+          source: 'bench/rtx3080_sm86_silicon_probe.cu · 17,734 bytes',
+          index: 'Movement 02 / 05',
+          title: 'Bare-Metal Truth: The RTX 3080 SM_86 Silicon Probe',
+          paragraphs: [
+            'High-level benchmarks lie through averaging. Our 17.7 KB CUDA kernel (rtx3080_sm86_silicon_probe.cu) targets NVIDIA Ampere SM_86 architecture directly—probing real Streaming Multiprocessor occupancy, cache hierarchy latency, and transient thermal signatures right at the die.',
+            'By grounding our optimization policies in direct silicon telemetry rather than synthetic guesses, ALETHEION knows the exact inflection point where additional wattage stops yielding compute throughput and begins creating destructive heat.',
+            'Those empirical silicon bounds feed directly upward into the thermal guard daemons and the live ScreenPad Plus visualizer.'
+          ],
+          axiomLabel: 'Ampere SM_86 Probing Invariant',
+          axiom: 'Probe(SM_86) → ExactMeasure(WarpThroughput, L2Residency, dT_die/dt)  [Zero Abstraction Tax]',
+          marginalia: '“Measure the silicon itself—every layer of middleware above CUDA is a hypothesis waiting to be tested.”',
+          artifacts: ['bench/rtx3080_sm86_silicon_probe.cu', 'bin/aletheion_thermal_rosen_guard.py'],
+          status: 'Direct Ampere SM_86 CUDA probe anchoring thermal and compute envelope calibration.',
+        },
+        {
+          source: 'docs/ZENBOOK_PRO_DUO_PLAYBOOK.md & configs/ · 7,593 bytes',
+          index: 'Movement 03 / 05',
+          title: 'Bifurcated Ergonomics: Hyprland, Omarchy 4.5 & Toroid HUD',
+          paragraphs: [
+            'The ZenBook Pro Duo UX582HS offers a rare physical topology: a 4K primary OLED plane perched above an angled ScreenPad Plus secondary strip. ALETHEION turns this hardware into a true two-tier cognitive cockpit.',
+            'Declarative Wayland geometry in hypr-zenbook-duo.conf and omarchy-4.5-ux582hs-monitors.lua locks both screens into deterministic coordinates, while aletheion_display.py orchestrates scaling and panel states programmatically.',
+            'Across the lower ScreenPad Plus, launch-screenpad-hud.sh ignites toroid-hud.py—rendering a continuous 3D toroidal phase instrument so system health lives in calm peripheral awareness without stealing a single pixel from deep work.'
+          ],
+          axiomLabel: 'Dual-Plane Spatial Contract',
+          axiom: 'eDP-1 (Deep Cognition) ⊥ eDP-2 (Toroid Phase Telemetry)  under Omarchy 4.5 + Hyprland',
+          marginalia: '“Telemetry should feel like the dashboard of a spacecraft—always breathing beneath your fingertips, never interrupting flow.”',
+          artifacts: ['docs/ZENBOOK_PRO_DUO_PLAYBOOK.md', 'configs/hypr-zenbook-duo.conf', 'configs/omarchy-4.5-ux582hs-monitors.lua', 'bin/toroid-hud.py'],
+          status: 'Declaratively configured and supervised by aletheia-toroid-watchdog.service & timer.',
+        },
+        {
+          source: 'docs/ALETHEION_DISPLAY_THERMAL_GUARD.md & Guards · 56,475 bytes',
+          index: 'Movement 04 / 05',
+          title: 'Coupled Homeostasis: Rosen Thermal & Display Power Guards',
+          paragraphs: [
+            'In dense dual-OLED mobile workstations, GPU compute heat and high-luminance display heat share the same thin thermal chassis. Treating them separately causes oscillating fans and sudden performance cliffs.',
+            'ALETHEION solves this with two tightly coupled Python daemons totaling over 53 KB: aletheion_thermal_rosen_guard.py tracks smooth Rosen stability boundaries across silicon temperatures, while aletheion_therm_display_guard.py modulates OLED luminance smoothly when thermal pressure climbs.',
+            'Supervised by systemd (aletheion-therm-display-guard.service), the workstation glides smoothly along its maximum sustainable performance envelope instead of slamming into emergency hardware throttling.'
+          ],
+          axiomLabel: 'Coupled Display-Thermal Contraction',
+          axiom: 'ΔT_chassis(t) → 0  via  SmoothClamp(P_OLED, P_SM86)  s.t.  Margin_Rosen(t) > 0',
+          marginalia: '“True optimization is silent stability at the edge of physics—never the violent thrashing of panicked fans.”',
+          artifacts: ['docs/ALETHEION_DISPLAY_THERMAL_GUARD.md', 'bin/aletheion_thermal_rosen_guard.py', 'bin/aletheion_therm_display_guard.py', 'systemd/aletheion-therm-display-guard.service'],
+          status: 'Verified against extreme thermal excursions by test_aletheion_display_thermal_guard_r5.py (22.9 KB).',
+        },
+        {
+          source: 'bin/verify_epistemic_integrity.py & tests/*_r5.py · 96,509 bytes',
+          index: 'Movement 05 / 05',
+          title: 'Epistemic Immunity: R5 Verification & Zero-Drift Continuity',
+          paragraphs: [
+            'More than a third of the entire aletheion-main codebase—96.5 kilobytes across verify_epistemic_integrity.py, test_aletheia_shell_r5.py, and test_aletheion_display_thermal_guard_r5.py—is dedicated to verifying truth and catching drift.',
+            'Whether bootstrapping a fresh UX582HS, launching the ScreenPad HUD, or freezing state for hardware migration, the machine proves its own invariants before claiming readiness.',
+            'This is the unifying thread across our overarching organization: whether building physical architecture (OPTIFAB) or a sovereign compute vessel (ALETHEION), we refuse unverified assumptions.'
+          ],
+          axiomLabel: 'Sovereign Integrity Guarantee',
+          axiom: 'Ready(Machine) ⇔ verify_epistemic_integrity() = PASS ∧ R5_Suite(Shell ∪ Guards) = PASS',
+          marginalia: '“A workstation you can freeze, migrate, resurrect, and mathematically verify is no longer a fragile pet—it is an immortal digital realm.”',
+          artifacts: ['bin/verify_epistemic_integrity.py', 'tests/test_aletheia_shell_r5.py', 'tests/test_aletheion_display_thermal_guard_r5.py'],
+          status: '71.1 KB of R5 automated tests + 25.4 KB runtime epistemic verifier.',
+        },
+      ];
+
+      function initPlaybookReader() {
+        let cur = 0;
+        const tabs = document.querySelectorAll('.pb-tab-btn');
+
+        function render(idx) {
+          cur = (idx + PLAYBOOK_CHAPTERS.length) % PLAYBOOK_CHAPTERS.length;
+          const ch = PLAYBOOK_CHAPTERS[cur];
+
+          document.getElementById('pb-source').textContent = ch.source;
+          document.getElementById('pb-index').textContent = ch.index;
+          document.getElementById('pb-title').textContent = ch.title;
+          document.getElementById('pb-body').innerHTML = ch.paragraphs.map((p) => `<p>${p}</p>`).join('');
+          document.getElementById('pb-axiom-label').textContent = ch.axiomLabel;
+          document.getElementById('pb-axiom').textContent = ch.axiom;
+          document.getElementById('pb-marginalia').textContent = ch.marginalia;
+          document.getElementById('pb-artifacts').innerHTML = ch.artifacts
+            .map((a) => `<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-toroid-400 shrink-0"></span><span class="truncate">${a}</span></li>`)
+            .join('');
+          document.getElementById('pb-status').textContent = ch.status;
+
+          tabs.forEach((b, i) => {
+            b.className = i === cur
+              ? 'pb-tab-btn shrink-0 text-left px-4 py-3.5 rounded-2xl border transition-all bg-silicon-850 border-toroid-400/55 text-chrome-50 shadow-lg'
+              : 'pb-tab-btn shrink-0 text-left px-4 py-3.5 rounded-2xl border transition-all bg-silicon-950/60 border-chrome-100/10 text-chrome-400 hover:text-chrome-100 hover:border-chrome-100/25';
+          });
+        }
+
+        tabs.forEach((b) => b.addEventListener('click', () => render(Number(b.dataset.ch))));
+        document.getElementById('pb-prev-btn').addEventListener('click', () => render(cur - 1));
+        document.getElementById('pb-next-btn').addEventListener('click', () => render(cur + 1));
+        render(0);
+      }
+
+      /* ------------------------------------------------------------------- */
+      /* 5. SOVEREIGN LIFECYCLE CHOREOGRAPHY (bin/*.sh Interactive Terminal) */
+      /* ------------------------------------------------------------------- */
+      const LIFECYCLE_STAGES = [
+        {
+          cmd: 'aletheion@ux582hs:~/aletheion-main/bin$ ./prep-boot-drive.sh --verify',
+          badge: 'GENESIS · 7,107 BYTES',
+          desc: 'Prepares a cryptographically verified sovereign boot drive with Omarchy 4.5 base images, hardware-specific UX582HS firmware payloads, and offline recovery tooling.',
+          checks: ['✓ Target block device safety guard passed', '✓ Partition table & EFI boot payload checksummed', '✓ Offline aletheion-main recovery bundle embedded'],
+          output: `[prep-boot-drive] Inspecting removable target device invariants...
+[prep-boot-drive] Safety lock: root NVMe excluded from write targets
+[prep-boot-drive] Writing GPT + EFI System Partition (FAT32, aligned 1MiB)
+[prep-boot-drive] Staging Omarchy 4.5 + ZenBook UX582HS kernel modules...
+[prep-boot-drive] Computing SHA-256 manifest of boot payload...
+[OK] Boot drive sealed & ready for deterministic bare-metal ignition.`,
+        },
+        {
+          cmd: 'aletheion@ux582hs:~/aletheion-main/bin$ ./bootstrap-zenbook.sh',
+          badge: 'PROVISION · 4,449 BYTES',
+          desc: 'Transforms a freshly imaged ZenBook Pro Duo UX582HS into the full ALETHEION workstation—deploying Hyprland dual-monitor configs, CUDA SM_86 toolchains, and systemd guard units.',
+          checks: ['✓ hypr-zenbook-duo.conf & omarchy-4.5-ux582hs-monitors.lua linked', '✓ systemd watchdog & thermal-display guard enabled', '✓ Dual-screen eDP-1 + eDP-2 touch matrix calibrated'],
+          output: `[bootstrap-zenbook] Detecting hardware signature: ASUS UX582HS (RTX 3080 SM_86)
+[bootstrap-zenbook] Installing configs/hypr-zenbook-duo.conf
+[bootstrap-zenbook] Applying configs/omarchy-4.5-ux582hs-monitors.lua
+[bootstrap-zenbook] Registering systemd/aletheion-therm-display-guard.service
+[bootstrap-zenbook] Registering systemd/aletheia-toroid-watchdog.timer
+[OK] UX582HS bare-metal provisioning converged.`,
+        },
+        {
+          cmd: 'aletheion@ux582hs:~/aletheion-main/bin$ ./launch-screenpad-hud.sh',
+          badge: 'IGNITION · 8,048 BYTES',
+          desc: 'Awakens the lower ScreenPad Plus panel as an autonomous telemetry instrument, binding Wayland layer rules and launching toroid-hud.py under watchdog supervision.',
+          checks: ['✓ eDP-2 ScreenPad Plus geometry verified (3840x1100)', '✓ toroid-hud.py attached to live SM_86 & Rosen feeds', '✓ aletheia-toroid-watchdog.service heartbeat active'],
+          output: `[launch-screenpad-hud] Querying Hyprland monitors via aletheion_display.py...
+[launch-screenpad-hud] Primary: eDP-1 (4K OLED) | Secondary: eDP-2 (ScreenPad+)
+[launch-screenpad-hud] Binding toroid-hud.py to eDP-2 dedicated telemetry layer
+[launch-screenpad-hud] Coupling thermal_rosen_guard & therm_display_guard streams
+[OK] Toroid HUD live at 60 FPS on ScreenPad Plus.`,
+        },
+        {
+          cmd: 'aletheion@ux582hs:~/aletheion-main/bin$ ./freeze-for-migration.sh',
+          badge: 'SNAPSHOT · 7,216 BYTES',
+          desc: 'Quiesces live daemons gracefully, captures configurations, thermal calibrations, and state ledgers into an atomic migration archive with zero unverified dangling state.',
+          checks: ['✓ Thermal & HUD daemons cleanly quiesced', '✓ All configs, systemd units & keys snapshotted', '✓ Pre-migration epistemic integrity digest sealed'],
+          output: `[freeze-for-migration] Signaling graceful pause to aletheia-toroid-watchdog...
+[freeze-for-migration] Capturing Hyprland, Omarchy 4.5, and display calibration pins
+[freeze-for-migration] Running pre-freeze verify_epistemic_integrity.py... PASS
+[freeze-for-migration] Emitting signed migration bundle + SHA-256 ledger
+[OK] Digital realm frozen atomically for zero-loss transport.`,
+        },
+        {
+          cmd: 'aletheion@ux582hs:~/aletheion-main/bin$ ./restore-and-verify.sh',
+          badge: 'RESURRECTION · 4,821 BYTES',
+          desc: 'Restores the frozen ALETHEION environment onto target hardware and automatically executes verify_epistemic_integrity.py + R5 checks before unlocking full operation.',
+          checks: ['✓ Cryptographic bundle hash matched pre-freeze seal', '✓ Systemd guards & Toroid HUD resurrected', '✓ verify_epistemic_integrity.py returned EXIT 0'],
+          output: `[restore-and-verify] Verifying archive cryptographic seal... MATCH
+[restore-and-verify] Hydrating UX582HS configs, bin daemons & systemd units
+[restore-and-verify] Invoking bin/verify_epistemic_integrity.py...
+[epistemic] 100% invariant parity confirmed across restored realm
+[restore-and-verify] Restarting aletheion-therm-display-guard & toroid-hud
+[OK] Sovereign machine resurrected & epistemically verified.`,
+        },
+      ];
+
+      function initLifecyclePipeline() {
+        const btns = document.querySelectorAll('.lc-stage-btn');
+
+        function setStage(idx) {
+          const st = LIFECYCLE_STAGES[idx];
+          if (!st) return;
+          document.getElementById('lc-term-title').textContent = st.cmd;
+          document.getElementById('lc-term-badge').textContent = st.badge;
+          document.getElementById('lc-term-output').textContent = st.output;
+          document.getElementById('lc-stage-desc').textContent = st.desc;
+          document.getElementById('lc-stage-checks').innerHTML = st.checks
+            .map((c) => `<li>${c}</li>`)
+            .join('');
+
+          btns.forEach((b, i) => {
+            b.className = i === idx
+              ? 'lc-stage-btn text-left p-4 rounded-2xl bg-silicon-850 border border-toroid-400/60 shadow-lg shadow-toroid-500/10 transition-all'
+              : 'lc-stage-btn text-left p-4 rounded-2xl bg-silicon-900 border border-chrome-100/10 hover:border-chrome-100/30 transition-all';
+          });
+        }
+
+        btns.forEach((b) => b.addEventListener('click', () => setStage(Number(b.dataset.stage))));
+        setStage(0);
+      }
+
+      /* ------------------------------------------------------------------- */
+      /* 6. ALETHEION-MAIN CORPUS ATLAS                                      */
+      /* ------------------------------------------------------------------- */
+      const ATLAS_MODULES = [
+        { name: 'RTX 3080 SM_86 Probe', path: 'bench/rtx3080_sm86_silicon_probe.cu', size: '17.7 KB', domain: 'bench', role: 'Bare-metal Ampere SM_86 CUDA kernel probing real warp occupancy, cache behavior, and silicon heat.' },
+        { name: 'Thermal Rosen Guard', path: 'bin/aletheion_thermal_rosen_guard.py', size: '28.2 KB', domain: 'daemons', role: 'Continuous Rosen-margin thermal boundary controller preventing violent silicon throttling.' },
+        { name: 'Display Thermal Guard', path: 'bin/aletheion_therm_display_guard.py', size: '25.2 KB', domain: 'daemons', role: 'Couples chassis heat directly with dual-OLED luminance and refresh policies.' },
+        { name: 'Display Orchestrator', path: 'bin/aletheion_display.py', size: '24.4 KB', domain: 'daemons', role: 'Programmatic UX582HS dual-display geometry, brightness, and Wayland state engine.' },
+        { name: 'Toroid HUD', path: 'bin/toroid-hud.py', size: '23.7 KB', domain: 'daemons', role: 'Real-time toroidal phase visualizer engineered for the ScreenPad Plus secondary strip.' },
+        { name: 'Epistemic Integrity Verifier', path: 'bin/verify_epistemic_integrity.py', size: '25.4 KB', domain: 'tests', role: 'Runtime auditor verifying cryptographic & architectural invariants across the compute node.' },
+        { name: 'R5 Shell Test Suite', path: 'tests/test_aletheia_shell_r5.py', size: '48.3 KB', domain: 'tests', role: 'Exhaustive R5 fault-injection test suite hardening lifecycle and migration shell scripts.' },
+        { name: 'R5 Display-Thermal Guard Tests', path: 'tests/test_aletheion_display_thermal_guard_r5.py', size: '22.9 KB', domain: 'tests', role: 'Adversarial R5 test suite validating hysteresis, clamping curves, and thermal safety.' },
+        { name: 'Launch ScreenPad HUD', path: 'bin/launch-screenpad-hud.sh', size: '8.0 KB', domain: 'shell', role: 'Orchestrates eDP-2 geometry binding and ignites toroid-hud.py cleanly.' },
+        { name: 'Freeze for Migration', path: 'bin/freeze-for-migration.sh', size: '7.2 KB', domain: 'shell', role: 'Quiesces daemons and produces an atomic, checksummed machine snapshot for transport.' },
+        { name: 'Prep Boot Drive', path: 'bin/prep-boot-drive.sh', size: '7.1 KB', domain: 'shell', role: 'Synthesizes deterministic sovereign boot media with safety locks against host drives.' },
+        { name: 'Restore & Verify', path: 'bin/restore-and-verify.sh', size: '4.8 KB', domain: 'shell', role: 'Resurrects frozen machine state and gates unlock on verify_epistemic_integrity.py.' },
+        { name: 'Bootstrap ZenBook', path: 'bin/bootstrap-zenbook.sh', size: '4.4 KB', domain: 'shell', role: 'Provisions a bare UX582HS into the full Hyprland/Omarchy/ALETHEION stack.' },
+        { name: 'Hyprland Duo Config', path: 'configs/hypr-zenbook-duo.conf', size: '1.8 KB', domain: 'configs', role: 'Declarative Wayland dual-panel workspace and input configuration for ZenBook Pro Duo.' },
+        { name: 'Omarchy 4.5 Monitors Lua', path: 'configs/omarchy-4.5-ux582hs-monitors.lua', size: '1.5 KB', domain: 'configs', role: 'Lua monitor topology pinning eDP-1 (4K OLED) and eDP-2 (ScreenPad+) profiles.' },
+        { name: 'Systemd Watchdog & Guard Units', path: 'systemd/{aletheia-toroid-watchdog.*, aletheion-therm-display-guard.service}', size: '1.3 KB', domain: 'configs', role: 'Autonomous systemd service and timer units guaranteeing uninterrupted daemon supervision.' },
+        { name: 'ZenBook Pro Duo Playbook', path: 'docs/ZENBOOK_PRO_DUO_PLAYBOOK.md', size: '4.3 KB', domain: 'configs', role: 'Operational guide for hardware tuning, dual-plane ergonomics, and daily workflows.' },
+        { name: 'Display Thermal Guard Spec', path: 'docs/ALETHEION_DISPLAY_THERMAL_GUARD.md', size: '3.0 KB', domain: 'configs', role: 'Architectural specification of coupled OLED-thermal feedback curves and safety bounds.' },
+      ];
+
+      const ATLAS_BADGES = {
+        bench: 'bg-ampere-900/80 text-ampere-300 border-ampere-400/35',
+        daemons: 'bg-toroid-900/80 text-toroid-300 border-toroid-400/35',
+        shell: 'bg-chrome-100/10 text-chrome-200 border-chrome-100/20',
+        configs: 'bg-verified-900/80 text-verified-300 border-verified-400/35',
+        tests: 'bg-epistemic-900/80 text-epistemic-300 border-epistemic-400/35',
+      };
+
+      function initCorpusAtlas() {
+        const grid = document.getElementById('atlas-grid');
+        const empty = document.getElementById('atlas-empty');
+        const search = document.getElementById('atlas-search');
+        let activeDomain = 'all';
+
+        function render() {
+          const q = (search.value || '').trim().toLowerCase();
+          const list = ATLAS_MODULES.filter((m) => {
+            const dOk = activeDomain === 'all' || m.domain === activeDomain;
+            const qOk = !q || m.name.toLowerCase().includes(q) || m.path.toLowerCase().includes(q) || m.role.toLowerCase().includes(q);
+            return dOk && qOk;
+          });
+
+          if (!list.length) {
+            grid.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
+          }
+
+          empty.classList.add('hidden');
+          grid.innerHTML = list.map((m) => `
+            <div class="group p-5 rounded-2xl bg-silicon-950 border border-chrome-100/10 hover:border-toroid-400/45 transition-all flex flex-col justify-between gap-4">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider border ${ATLAS_BADGES[m.domain]}">${m.domain}</span>
+                  <span class="font-mono text-[11px] text-chrome-400">${m.size}</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-chrome-50 group-hover:text-toroid-300 transition-colors">${m.name}</h3>
+                <div class="mt-1 font-mono text-[11px] text-chrome-400 break-all">${m.path}</div>
+                <p class="mt-3 text-xs text-chrome-200/80 leading-relaxed">${m.role}</p>
+              </div>
+              <div class="pt-3 border-t border-chrome-100/10 flex items-center justify-between text-[11px] font-mono">
+                <span class="text-chrome-500">aletheion-main</span>
+                <button type="button" data-copy-path="${m.path}" class="copy-path-btn text-toroid-300 hover:text-toroid-400 transition-colors">Copy Path</button>
+              </div>
+            </div>
+          `).join('');
+
+          grid.querySelectorAll('.copy-path-btn').forEach((b) => {
+            b.addEventListener('click', () => copyTextSafe(b.dataset.copyPath));
+          });
+        }
+
+        document.querySelectorAll('.atlas-domain-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            activeDomain = btn.dataset.domain;
+            document.querySelectorAll('.atlas-domain-btn').forEach((b) => {
+              b.classList.remove('bg-chrome-50', 'text-silicon-950', 'font-semibold');
+              if (b.dataset.domain === 'all') {
+                b.classList.add('bg-silicon-950', 'text-chrome-200', 'border', 'border-chrome-100/15');
+              }
+            });
+            btn.classList.remove('bg-silicon-950');
+            btn.classList.add('bg-chrome-50', 'text-silicon-950', 'font-semibold');
+            render();
+          });
+        });
+
+        search.addEventListener('input', render);
+        render();
+      }
+
+      /* ------------------------------------------------------------------- */
+      /* 7. MANIFEST & CITATION EXPORT MODAL                                 */
+      /* ------------------------------------------------------------------- */
+      const CITE_DATA = {
+        bibtex: `@software{aletheion2026realm,
+  title   = {ALETHEION: Gigaoptimized Sovereign Workstation & Epistemic Compute Realm},
+  author  = {{Overarching Research Organization}},
+  year    = {2026},
+  version = {aletheion-main-r5},
+  note    = {30-artifact corpus: RTX 3080 SM_86 CUDA probe, UX582HS dual-display Hyprland/Omarchy 4.5 cockpit, Toroid HUD, Rosen thermal-display guards, R5 epistemic verification}
+}`,
+        summary: `ALETHEION — The Gigaoptimized Digital Realm.
+A sovereign computing architecture uniting bare-metal NVIDIA Ampere SM_86 CUDA probing, dual-screen ASUS ZenBook Pro Duo UX582HS Wayland/Omarchy 4.5 orchestration, live ScreenPad Plus Toroid HUD telemetry, coupled Rosen thermal-display homeostasis daemons, atomic migration scripts, and 96.5 KB of R5 epistemic integrity verification.`,
+        manifest: JSON.stringify({
+          corpus: 'aletheion-main',
+          entries: 30,
+          total_bytes: 276481,
+          hardware_target: ['NVIDIA RTX 3080 (Ampere SM_86)', 'ASUS ZenBook Pro Duo UX582HS'],
+          silicon_probe: 'bench/rtx3080_sm86_silicon_probe.cu',
+          guards_and_hud: [
+            'bin/aletheion_thermal_rosen_guard.py',
+            'bin/aletheion_therm_display_guard.py',
+            'bin/aletheion_display.py',
+            'bin/toroid-hud.py'
+          ],
+          verification: [
+            'bin/verify_epistemic_integrity.py',
+            'tests/test_aletheia_shell_r5.py',
+            'tests/test_aletheion_display_thermal_guard_r5.py'
+          ]
+        }, null, 2),
+      };
+
+      function initCiteModal() {
+        const modal = document.getElementById('cite-modal');
+        const out = document.getElementById('cite-output');
+        const openBtn = document.getElementById('open-cite-btn');
+        const footerBtn = document.getElementById('footer-cite-btn');
+        const closeBtn = document.getElementById('close-cite-btn');
+        const copyBtn = document.getElementById('copy-cite-btn');
+        let tab = 'bibtex';
+
+        function setTab(next) {
+          tab = next;
+          out.textContent = CITE_DATA[tab];
+          document.querySelectorAll('.cite-tab-btn').forEach((b) => {
+            b.className = b.dataset.citeTab === tab
+              ? 'cite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-mono bg-chrome-50 text-silicon-950 font-semibold'
+              : 'cite-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-mono bg-silicon-850 text-chrome-300 border border-chrome-100/10 hover:border-chrome-100/30';
+          });
+        }
+
+        function open() {
+          setTab(tab);
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        }
+
+        function close() {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
+
+        if (openBtn) openBtn.addEventListener('click', open);
+        if (footerBtn) footerBtn.addEventListener('click', open);
+        if (closeBtn) closeBtn.addEventListener('click', close);
+        if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.classList.contains('hidden')) close(); });
+        document.querySelectorAll('.cite-tab-btn').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.citeTab)));
+        if (copyBtn) copyBtn.addEventListener('click', () => copyTextSafe(CITE_DATA[tab]));
+      }
+
+      /* ------------------------------------------------------------------- */
+      /* BOOTSTRAP ALL INTERACTIVE MODULES ON WINDOW LOAD                    */
+      /* ------------------------------------------------------------------- */
+      window.addEventListener('load', () => {
+        initHeroToroidCanvas();
+        initTopologyGraph();
+        initDualCockpit();
+        initPlaybookReader();
+        initLifecyclePipeline();
+        initCorpusAtlas();
+        initCiteModal();
+      });
+    })();
+  </script>
+</body>
+</html>
