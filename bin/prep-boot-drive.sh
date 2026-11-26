@@ -59,6 +59,9 @@ done
 DEV="$(readlink -f -- "$DEV")"
 [[ -b "$DEV" ]] || { echo "ERROR: not a block device after resolving: $DEV" >&2; exit 2; }
 [[ -f "$ISO" ]] || { echo "ERROR: ISO not found: $ISO" >&2; exit 2; }
+# Make the ISO path absolute (without resolving symlinks, so the .sha256 sidecar is still
+# looked up next to the path the user gave): no later argument can then begin with '-'.
+[[ "$ISO" == /* ]] || ISO="$PWD/$ISO"
 [[ "$START_GIB" =~ ^[0-9]+$ && "$START_GIB" -ge 8 ]] || { echo "ERROR: invalid --start-gib: $START_GIB" >&2; exit 2; }
 [[ "$LABEL" =~ ^[A-Za-z0-9_-]{1,16}$ ]] || { echo "ERROR: invalid ext4 label: $LABEL" >&2; exit 2; }
 [[ "$OWNER" =~ ^[A-Za-z_][A-Za-z0-9_-]*(:[A-Za-z_][A-Za-z0-9_-]*)?$ ]] || { echo "ERROR: invalid --owner (expected USER or USER:GROUP): $OWNER" >&2; exit 2; }
@@ -76,9 +79,16 @@ if [[ "$DRY_RUN" -eq 0 && "$(id -u)" -ne 0 ]]; then
   exit 1
 fi
 
-for tool in lsblk findmnt wipefs dd sfdisk partprobe mkfs.ext4 mount umount chown sha256sum stat od readlink; do
+# --dry-run only reads (lsblk/findmnt/stat/od/readlink/sha256sum); the five destructive tools are
+# required only for a real run, so a dry-run can finish its safety checks on a host without them.
+for tool in lsblk findmnt mount umount chown sha256sum stat od readlink; do
   command -v "$tool" >/dev/null 2>&1 || { echo "ERROR: missing required tool: $tool" >&2; exit 2; }
 done
+if [[ "$DRY_RUN" -eq 0 ]]; then
+  for tool in wipefs dd sfdisk partprobe mkfs.ext4; do
+    command -v "$tool" >/dev/null 2>&1 || { echo "ERROR: missing required tool: $tool" >&2; exit 2; }
+  done
+fi
 
 # Remediation hint if anything fails after the destructive steps have started.
 # The ERR trap is armed only right before the first write (see step [2/6] below), so that
@@ -128,6 +138,9 @@ is_dev_holder() {
 # 1a. Critical host mounts anywhere on DEV or its children (mountpoint-based; lsblk
 #     traverses crypt/lvm children and MOUNTPOINTS lists every mount of each device).
 while IFS= read -r line; do
+  # `lsblk -r` encodes a device's several mountpoints as a literal "\x0a" inside one cell;
+  # split on it (and on commas) so every mountpoint is checked, not just the first.
+  line="${line//\\x0a/ }"
   line="${line//,/ }"
   read -r -a mps <<< "$line"
   for mp in "${mps[@]}"; do
@@ -144,6 +157,11 @@ done < <(lsblk -nr -o MOUNTPOINTS "$DEV")
 # 1b. Live-system mounts backed by DEV or any of its holders (source-based). Catches
 #     booting from the target live USB: an Arch/Omarchy live environment mounts its
 #     medium under /run/archiso/*, which the mountpoint list above may not flag.
+# A findmnt failure means we cannot prove DEV is not a live disk: refuse instead of skipping 1b.
+if ! FINDMNT_ALL="$(findmnt -rn -o SOURCE,TARGET 2>/dev/null)"; then
+  echo "ERROR: findmnt failed to list mounts; cannot prove $DEV is not backing a live system; refusing fail-closed" >&2
+  exit 2
+fi
 while IFS= read -r line; do
   src="${line%% *}"
   tgt="${line#* }"
@@ -154,14 +172,16 @@ while IFS= read -r line; do
       exit 2
       ;;
   esac
-done < <(findmnt -rn -o SOURCE,TARGET 2>/dev/null || true)
+done <<< "$FINDMNT_ALL"
 
 # 1c. The ISO must not live on the target device: we unmount and wipe DEV below,
 #     which would destroy the dd source mid-flight. Fail closed if the backing
 #     device of the ISO cannot be determined.
-ISO_SOURCE="$(findmnt -n -o SOURCE -T "$ISO" 2>/dev/null || true)"
+# --target=PATH keeps the path inside the option's own argv word. (`findmnt -T -- PATH` would
+# make "--" the -T argument and then reject PATH as a stray element.)
+ISO_SOURCE="$(findmnt -n -o SOURCE --target="$ISO" 2>/dev/null || true)"
 if [[ -z "$ISO_SOURCE" ]]; then
-  echo "ERROR: could not determine which device backs $ISO (findmnt -T failed); refusing fail-closed" >&2
+  echo "ERROR: could not determine which device backs $ISO (findmnt --target failed); refusing fail-closed" >&2
   exit 2
 fi
 if is_dev_holder "$ISO_SOURCE"; then
