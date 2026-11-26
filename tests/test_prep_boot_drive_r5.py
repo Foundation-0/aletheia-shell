@@ -9,6 +9,10 @@ so the destructive script is exercised end-to-end without touching a real device
 only real block device referenced is an untouched loop node, needed solely to satisfy
 the script's `[[ -b ]]` test; sha256sum/stat/od run for real against a synthetic ISO.
 
+Also covers the issue #12 disk-safety follow-ups: multi-mount lsblk cells, findmnt
+list failure, an ISO path beginning with '-', and --dry-run with no destructive tools on
+PATH (test_10..test_13).
+
 Covers the review gates: sidecar unbound/missing/multi/malformed, self-target via
 /dev/mapper and Btrfs subvol sources, ISO-on-target, empty ISO source, partprobe
 failure, exact-START partition selection (0/1/2 matches), non-root --dry-run, EOF /
@@ -24,6 +28,7 @@ import hashlib
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -57,11 +62,19 @@ exit 0
 FINDMNT_STUB = r"""#!/bin/bash
 echo "findmnt $*" >> "${STUB_LOG:-/dev/null}"
 mode="list"
+prev=""
 for a in "$@"; do
   case "$a" in
-    -T) mode="target" ;;
+    -T|--target=*) mode="target" ;;
     --source) mode="source" ;;
   esac
+  # Like util-linux getopt: -T consumes the next word, so `-T -- PATH` looks up "--"
+  # and then rejects PATH as a stray element (real findmnt exits 1 here).
+  if [[ "$prev" == "-T" && "$a" == "--" ]]; then
+    echo "findmnt: options --target and --source can't be used together with command line element that is not an option" >&2
+    exit 1
+  fi
+  prev="$a"
 done
 case "$mode" in
   target)
@@ -78,6 +91,7 @@ case "$mode" in
   *)
     f="${STATE:?}/findmnt_SOURCE_TARGET"
     if [[ -f "$f" ]]; then cat "$f"; fi
+    if [[ -f "${STATE:?}/findmnt_SOURCE_TARGET.rc" ]]; then exit "$(cat "${STATE:?}/findmnt_SOURCE_TARGET.rc")"; fi
     exit 0
     ;;
 esac
@@ -119,6 +133,8 @@ exit "$rc"
 ID_STUB = r"""#!/bin/bash
 if [[ -f "${STATE:-/nonexistent}/id_u" ]]; then cat "${STATE:-/nonexistent}/id_u"; else /usr/bin/id -u; fi
 """
+
+DISK_TOOLS = ("wipefs", "dd", "sfdisk", "partprobe", "mkfs.ext4")
 
 GENERIC_STUBS = ("wipefs", "dd", "sfdisk", "mkfs.ext4", "mount", "umount", "chown", "sync", "udevadm")
 
@@ -199,23 +215,41 @@ class PrepDriveHarness:
         self.write_state(st)
         return st
 
-    def run(self, extra_args: list[str], stdin: str = "") -> subprocess.CompletedProcess:
+    def run(self, extra_args: list[str], stdin: str = "", iso: str | None = None,
+            cwd: str | None = None, path: str | None = None) -> subprocess.CompletedProcess:
         # Fresh call log per run so assertions only see this invocation's stub calls.
         self.log.write_text("", encoding="utf-8")
         args = [
-            "bash", str(SCRIPT),
+            shutil.which("bash") or "/bin/bash", str(SCRIPT),
             "--device", DEV,
-            "--iso", str(self.iso_dir / "omarchy.iso"),
+            "--iso", iso if iso is not None else str(self.iso_dir / "omarchy.iso"),
             "--mount", str(self.mount_dir),
             "--owner", "user:group",
             *extra_args,
         ]
         env = dict(os.environ)
-        env["PATH"] = str(self.bindir) + os.pathsep + env.get("PATH", "")
+        env["PATH"] = path if path is not None else str(self.bindir) + os.pathsep + env.get("PATH", "")
         env["STATE"] = str(self.state)
         env["STUB_LOG"] = str(self.log)
         return subprocess.run(args, input=stdin, capture_output=True, text=True,
-                              env=env, timeout=60, check=False)
+                              env=env, timeout=60, check=False, cwd=cwd)
+
+    def path_without_disk_tools(self) -> str:
+        """PATH = stub dir (minus the five destructive tools) + a dir of real, read-only utilities.
+
+        No system bin dir is on this PATH, so a real wipefs/dd/sfdisk/partprobe/mkfs.ext4
+        cannot be found either."""
+        for name in DISK_TOOLS:
+            (self.bindir / name).unlink()
+        real = self.root / "realbin"
+        real.mkdir()
+        for name in ("cat", "tr", "sed", "awk", "stat", "od", "sha256sum", "basename",
+                     "dirname", "mkdir", "sleep"):
+            target = shutil.which(name)
+            if target is None:
+                raise unittest.SkipTest(f"host lacks {name}")
+            (real / name).symlink_to(target)
+        return str(self.bindir) + os.pathsep + str(real)
 
     def calls(self) -> str:
         if self.log.exists():
@@ -549,6 +583,99 @@ class TestPrepBootDriveGates(unittest.TestCase):
         self.assertEqual(r.returncode, 2)
         self.assertIn("ISO not found", r.stderr)
         self.assertNotIn("wipefs", h.calls())
+
+
+    def test_10_lsblk_multi_mount_cell_is_split(self) -> None:
+        # Issue #12 item 1: `lsblk -r` packs several mountpoints of one device into a
+        # single cell joined by a literal "\\x0a". The critical mount is not first, and the
+        # first entry is not itself a critical prefix; findmnt (1b) reports nothing, so
+        # only check 1a can catch it.
+        h = self.h
+        h.make_iso()
+        for cell, hit in (("/mnt/data\\x0a/home\n", "/home"),
+                          ("/media/usb\\x0a/mnt/x\\x0a/boot/efi\n", "/boot/efi"),
+                          ("[SWAP]\n", "[SWAP]")):
+            h.base_state(**{_lsblk_key("MOUNTPOINTS"): cell})
+            r = h.run(["--dry-run"])
+            self.assertEqual(r.returncode, 2, (cell, r.stdout, r.stderr))
+            self.assertIn(f"critical host mount: {hit}", r.stderr)
+            self.assertNotIn("DRY_RUN_OK", r.stdout)
+        # Control: several non-critical mounts in one cell still pass.
+        h.base_state(**{_lsblk_key("MOUNTPOINTS"): "/mnt/data\\x0a/media/usb\n"})
+        r = h.run(["--dry-run"])
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("DRY_RUN_OK", r.stdout)
+
+    def test_11_findmnt_list_failure_fails_closed(self) -> None:
+        # Issue #12 item 2: if `findmnt -rn -o SOURCE,TARGET` errors, 1b must refuse
+        # rather than be skipped (formerly `|| true`).
+        h = self.h
+        h.make_iso()
+        for rc in ("1\n", "4\n"):
+            h.base_state(**{"findmnt_SOURCE_TARGET.rc": rc})
+            r = h.run(["--dry-run"])
+            self.assertEqual(r.returncode, 2, (rc, r.stdout, r.stderr))
+            self.assertIn("findmnt failed to list mounts", r.stderr)
+            self.assertNotIn("DRY_RUN_OK", r.stdout)
+        # Real run with --yes stops at the same gate before any write.
+        h.base_state(**{"findmnt_SOURCE_TARGET.rc": "1\n"})
+        r = h.run(["--yes"])
+        self.assertEqual(r.returncode, 2, r.stderr)
+        self.assertIn("findmnt failed to list mounts", r.stderr)
+        for tool in ("wipefs", "dd ", "sfdisk", "mkfs.ext4", "umount", "partprobe"):
+            self.assertNotIn(tool, h.calls())
+
+    def test_12_iso_path_starting_with_dash(self) -> None:
+        # Issue #12 item 3: the ISO path is passed to findmnt so it cannot be read as an
+        # option. The script makes it absolute and passes --target=PATH as one argv word.
+        h = self.h
+        iso = h.make_iso(name="-omarchy.iso")
+        h.base_state()
+        r = h.run(["--dry-run"], iso="-omarchy.iso", cwd=str(h.iso_dir))
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("DRY_RUN_OK", r.stdout)
+        self.assertIn(f"ISO:          {iso} ", r.stdout)
+        self.assertIn(f"findmnt -n -o SOURCE --target={iso}\n", h.calls())
+        # And the ISO-on-target gate still resolves through that call.
+        h.base_state(findmnt_SOURCE_T=f"{DEV_PART}\n")
+        r = h.run(["--dry-run"], iso="-omarchy.iso", cwd=str(h.iso_dir))
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("is stored on target device", r.stderr)
+
+    def test_13_dry_run_without_destructive_tools_on_path(self) -> None:
+        # Issue #12 item 4: --dry-run finishes its safety checks with none of wipefs, dd,
+        # sfdisk, partprobe, mkfs.ext4 on PATH; a real run still requires each of them.
+        h = self.h
+        h.make_iso()
+        h.base_state()
+        path = h.path_without_disk_tools()
+        r = h.run(["--dry-run"], path=path)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("DRY_RUN_OK", r.stdout)
+        self.assertNotIn("missing required tool", r.stderr)
+        r = h.run(["--yes"], path=path)
+        self.assertEqual(r.returncode, 2, r.stderr)
+        self.assertIn("missing required tool: wipefs", r.stderr)
+        self.assertNotIn("VERIFIED PLAN", r.stdout)
+        self.assertNotIn("umount", h.calls())
+        # Each of the five is required on its own for a real run.
+        stub_body = GENERIC_STUB
+        for missing in DISK_TOOLS:
+            for name in DISK_TOOLS:
+                p = h.bindir / name
+                if name == missing:
+                    if p.exists():
+                        p.unlink()
+                else:
+                    p.write_text(PARTPROBE_STUB if name == "partprobe" else stub_body, encoding="utf-8")
+                    p.chmod(0o755)
+            r = h.run(["--yes"], path=path)
+            self.assertEqual(r.returncode, 2, (missing, r.stderr))
+            self.assertIn(f"missing required tool: {missing}", r.stderr)
+            self.assertNotIn("umount", h.calls())
+            r = h.run(["--dry-run"], path=path)
+            self.assertEqual(r.returncode, 0, (missing, r.stderr))
+            self.assertIn("DRY_RUN_OK", r.stdout)
 
 
 if __name__ == "__main__":
