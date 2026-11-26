@@ -236,8 +236,8 @@
         <div class="p-4 rounded-2xl bg-silicon-900/75 backdrop-blur-md border border-chrome-100/10">
           <div class="text-[11px] font-mono uppercase tracking-widest text-chrome-400">Sovereign Corpus</div>
           <div class="mt-1 flex items-baseline gap-2">
-            <span class="font-display text-3xl font-semibold text-chrome-50">30</span>
-            <span class="text-xs font-mono text-toroid-300">276.5 KB dense</span>
+            <span class="font-display text-3xl font-semibold text-chrome-50">22</span>
+            <span class="text-xs font-mono text-toroid-300">276.4 KB dense</span>
           </div>
           <p class="mt-1 text-xs text-chrome-400">CUDA, Python daemons, Lua, systemd &amp; R5</p>
         </div>
@@ -613,7 +613,7 @@
             <div class="p-3.5 rounded-2xl bg-silicon-950 border border-chrome-100/10">
               <div class="text-[10px] font-mono uppercase tracking-wider text-chrome-400">SM_86 Junction T_j</div>
               <div id="tel-temp" class="mt-1 font-mono text-lg text-ampere-300">58.4 °C</div>
-              <div class="text-[10px] font-mono text-chrome-500 mt-0.5">68 SMs · 1,710 MHz</div>
+              <div class="text-[10px] font-mono text-chrome-500 mt-0.5">48 SMs · GA104M</div>
             </div>
 
             <div class="p-3.5 rounded-2xl bg-silicon-950 border border-chrome-100/10">
@@ -817,7 +817,7 @@
   </section>
 
   <!-- ===================================================================== -->
-  <!-- SECTION VI: COMPLETE ALETHEION-MAIN CORPUS ATLAS (30 Entries)         -->
+  <!-- SECTION VI: COMPLETE ALETHEION-MAIN CORPUS ATLAS (18 Cards / 22 Files) -->
   <!-- ===================================================================== -->
   <section id="atlas" class="py-20 sm:py-28 bg-silicon-900/40 border-b border-chrome-100/10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -828,7 +828,7 @@
             The <span class="font-mono text-3xl sm:text-4xl text-toroid-300">aletheion-main</span> Corpus
           </h2>
           <p class="mt-3 text-sm sm:text-base text-chrome-200/75 max-w-2xl">
-            Every visual claim maps directly to verifiable source code across 30 tracked entries (276,481 bytes)—spanning CUDA silicon probes, Python guards, Wayland/Omarchy configs, systemd units, and R5 test suites.
+            Every visual claim maps directly to verifiable source code across 18 atlas cards / 22 files (276,384 bytes)—spanning CUDA silicon probes, Python guards, Wayland/Omarchy configs, systemd units, and R5 test suites.
           </p>
         </div>
 
@@ -899,7 +899,7 @@
       </div>
 
       <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-chrome-500">
-        <div>Corpus Manifest: aletheion-main · 30 entries · 276,481 bytes · Licensed (LICENSE)</div>
+        <div>Corpus Manifest: aletheion-main · 22 files · 276,384 bytes · Licensed (LICENSE)</div>
         <div class="flex items-center gap-4">
           <button id="footer-cite-btn" type="button" class="text-toroid-300 hover:text-toroid-400 transition-colors">Copy Machine Manifest</button>
           <a href="#top" class="text-chrome-400 hover:text-chrome-100 transition-colors">Return to Toroid Apex &uarr;</a>
@@ -1644,8 +1644,8 @@
           t: 0,
         };
 
-        // 68 Streaming Multiprocessors (Ampere RTX 3080 GA102 SM_86 layout: 17 x 4 grid)
-        const smSeeds = Array.from({ length: 68 }, (_, i) => ({
+        // 48 Streaming Multiprocessors (Ampere RTX 3080 Laptop GA104M SM_86 schematic: 12 x 4 grid)
+        const smSeeds = Array.from({ length: 48 }, (_, i) => ({
           phase: (i * 0.41) % (Math.PI * 2),
           bias: 0.75 + ((i * 19) % 10) * 0.04,
         }));
@@ -1715,8 +1715,6 @@
           }
 
           const effectiveNits = Math.max(40, Math.round(sim.nits * (1 - sim.clampPct / 100)));
-          const clockMhz = sim.frozen ? 210 : (sim.mode === 'CRITICAL' ? 1140 : (sim.mode === 'CLAMPING' ? 1485 : 1710 + Math.round(sim.cuda * 1.4)));
-
           const dot = document.getElementById('cockpit-status-dot');
           const badge = document.getElementById('cockpit-status-badge');
           const edp1 = document.getElementById('edp1-refresh');
@@ -1738,7 +1736,7 @@
             edp1.textContent = `60 Hz · ${effectiveNits} nits`;
             edp2.textContent = 'LUMINANCE: FULL · WATCHDOG: ARMED';
             edp2.className = 'text-verified-400';
-            logLine.textContent = `[aletheion_thermal_rosen_guard] SM_86 running at ${clockMhz} MHz with +${sim.rosenMargin.toFixed(1)} K Rosen reserve; ScreenPad Plus Toroid HUD nominal.`;
+            logLine.textContent = `[aletheion_thermal_rosen_guard] SM_86 homeostatic with +${sim.rosenMargin.toFixed(1)} K Rosen reserve; ScreenPad Plus Toroid HUD nominal.`;
           } else if (sim.mode === 'CLAMPING') {
             dot.className = 'w-2.5 h-2.5 rounded-full bg-ampere-400 animate-pulse';
             badge.className = 'font-mono text-xs font-semibold uppercase tracking-widest text-ampere-300';
@@ -1754,7 +1752,7 @@
             edp1.textContent = `48 Hz · ${effectiveNits} nits (CLAMP)`;
             edp2.textContent = 'ALERT MODE · FAN & POWER CAP';
             edp2.className = 'text-rose-400';
-            logLine.textContent = `[aletheion_thermal_rosen_guard] Critical silicon flux (${sim.temp.toFixed(1)} °C). Enforcing Rosen boundary clamp, capping SM_86 to ${clockMhz} MHz, and holding epistemic lock.`;
+            logLine.textContent = `[aletheion_thermal_rosen_guard] Critical silicon flux (${sim.temp.toFixed(1)} °C). Enforcing Rosen boundary clamp on SM_86 and holding epistemic lock.`;
           }
 
           document.getElementById('tel-temp').textContent = `${sim.temp.toFixed(1)} °C`;
@@ -1830,7 +1828,7 @@
             /* ---- CANVAS A: PRIMARY DISPLAY (eDP-1) SM_86 DIE MATRIX ---- */
             dieCtx.clearRect(0, 0, dieW, dieH);
 
-            // Split view: Left 62% SM_86 68-SM Silicon Die Floorplan, Right 38% Rosen Thermal Phase Wave
+            // Split view: Left 62% SM_86 48-SM Silicon Die Floorplan, Right 38% Rosen Thermal Phase Wave
             const splitX = dieW * 0.62;
 
             // Die background border
@@ -1841,8 +1839,8 @@
             dieCtx.lineWidth = 1;
             dieCtx.strokeRect(pad, pad, dieBoxW, dieBoxH);
 
-            // Draw 68 SM_86 tiles (17 cols x 4 rows)
-            const cols = 17;
+            // Draw 48 SM_86 tiles (12 cols x 4 rows)
+            const cols = 12;
             const rows = 4;
             const gap = 4;
             const cellW = (dieBoxW - 16 - gap * (cols - 1)) / cols;
@@ -1850,7 +1848,7 @@
 
             dieCtx.fillStyle = '#7D8DA8';
             dieCtx.font = '10px "JetBrains Mono", monospace';
-            dieCtx.fillText('GA102 / SM_86 · 68 STREAMING MULTIPROCESSORS', pad + 8, pad + 15);
+            dieCtx.fillText('GA104M / SM_86 · 48 STREAMING MULTIPROCESSORS', pad + 8, pad + 15);
 
             const loadFrac = sim.cuda / 100;
             const heatFrac = Math.max(0, Math.min(1, (sim.temp - 35) / 60));
@@ -2025,7 +2023,7 @@
           axiom: 'Aletheion := UnconcealedSilicon(SM_86) ⊗ SpatialCockpit(UX582HS) ⊗ EpistemicLock(R5)',
           marginalia: '“A machine whose internal state is hidden from its operator cannot serve as a vessel for rigorous discovery.”',
           artifacts: ['README.md', 'LICENSE', 'bin/verify_epistemic_integrity.py'],
-          status: 'Core vision unifying all 30 entries across bench/, bin/, configs/, docs/, systemd/, and tests/.',
+          status: 'Core vision unifying all 22 files (18 atlas cards) across bench/, bin/, configs/, docs/, systemd/, and tests/.',
         },
         {
           source: 'bench/rtx3080_sm86_silicon_probe.cu · 17,734 bytes',
@@ -2315,14 +2313,15 @@
   author  = {{Overarching Research Organization}},
   year    = {2026},
   version = {aletheion-main-r5},
-  note    = {30-artifact corpus: RTX 3080 SM_86 CUDA probe, UX582HS dual-display Hyprland/Omarchy 4.5 cockpit, Toroid HUD, Rosen thermal-display guards, R5 epistemic verification}
+  note    = {22-file corpus (18 atlas cards): RTX 3080 SM_86 CUDA probe, UX582HS dual-display Hyprland/Omarchy 4.5 cockpit, Toroid HUD, Rosen thermal-display guards, R5 epistemic verification}
 }`,
         summary: `ALETHEION — The Gigaoptimized Digital Realm.
 A sovereign computing architecture uniting bare-metal NVIDIA Ampere SM_86 CUDA probing, dual-screen ASUS ZenBook Pro Duo UX582HS Wayland/Omarchy 4.5 orchestration, live ScreenPad Plus Toroid HUD telemetry, coupled Rosen thermal-display homeostasis daemons, atomic migration scripts, and 96.5 KB of R5 epistemic integrity verification.`,
         manifest: JSON.stringify({
           corpus: 'aletheion-main',
-          entries: 30,
-          total_bytes: 276481,
+          entries: 22,
+          atlas_cards: 18,
+          total_bytes: 276384,
           hardware_target: ['NVIDIA RTX 3080 (Ampere SM_86)', 'ASUS ZenBook Pro Duo UX582HS'],
           silicon_probe: 'bench/rtx3080_sm86_silicon_probe.cu',
           guards_and_hud: [
